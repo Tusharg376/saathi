@@ -3,7 +3,9 @@ import type { FetchLike } from "../http/postJson";
 import { runDraft, startingPoint, type FlowInput } from "./flow";
 import { EMPTY_FIELDS } from "./request";
 
-const reply = (status: number, body: unknown): FetchLike => async () => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+const reply =
+  (status: number, body: unknown): FetchLike =>
+  async () => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 const input = (over: Partial<FlowInput> = {}): FlowInput => ({
   issue: "short_payment",
   lang: "hi",
@@ -15,14 +17,29 @@ const input = (over: Partial<FlowInput> = {}): FlowInput => ({
   final: false,
   ...over,
 });
-const draft = { needsInfo: false, questions: [], subject: "S", letter: "Date: {{date}}\n{{name}}", summary: "It asks for payment.", evidence: [] };
+const draft = {
+  needsInfo: false,
+  questions: [],
+  subject: "S",
+  letter: "Date: {{date}}\n{{name}}",
+  summary: "It asks for payment.",
+  evidence: [],
+};
 
 describe("startingPoint", () => {
   it("is blank when nothing was handed over", () => {
     expect(startingPoint()).toEqual({ issue: null, description: "", fields: EMPTY_FIELDS });
   });
   it("fills in what another screen knew", () => {
-    expect(startingPoint({ issue: "penalty", party: "Swiggy", dates: "16 October 2026", amountInr: 450, description: "They cut Rs 450." })).toEqual({
+    expect(
+      startingPoint({
+        issue: "penalty",
+        party: "Swiggy",
+        dates: "16 October 2026",
+        amountInr: 450,
+        description: "They cut Rs 450.",
+      }),
+    ).toEqual({
       issue: "penalty",
       description: "They cut Rs 450.",
       fields: { party: "Swiggy", dates: "16 October 2026", amount: "450", ids: "" },
@@ -49,7 +66,10 @@ describe("runDraft", () => {
 
   it("passes the model's questions on", async () => {
     const asking = { ...draft, needsInfo: true, questions: ["Which app?"], letter: "" };
-    expect(await runDraft(input(), reply(200, { draft: asking }))).toEqual({ kind: "questions", questions: ["Which app?"] });
+    expect(await runDraft(input(), reply(200, { draft: asking }))).toEqual({
+      kind: "questions",
+      questions: ["Which app?"],
+    });
   });
 
   it("falls back to the offline template when the AI is off, so the worker still gets a letter", async () => {
@@ -71,12 +91,18 @@ describe("runDraft", () => {
   });
 
   it("tells the worker to wait on a rate limit, instead of writing a template", async () => {
-    expect(await runDraft(input(), reply(429, { error: "rate_limited" }))).toEqual({ kind: "error", key: "cmp.err.rate" });
+    expect(await runDraft(input(), reply(429, { error: "rate_limited" }))).toEqual({
+      kind: "error",
+      key: "cmp.err.rate",
+    });
   });
 
   it("sends only the answered questions, and never the worker's name or phone", async () => {
     let body = "";
-    const spy: FetchLike = async (_u, init) => ((body = String(init.body)), { ok: true, status: 200, json: async () => ({ draft }) });
+    const spy: FetchLike = async (_u, init) => (
+      (body = String(init.body)),
+      { ok: true, status: 200, json: async () => ({ draft }) }
+    );
     await runDraft(input({ final: true, questions: ["Which app?", "When?"], answers: ["Swiggy", ""] }), spy);
     const sent = JSON.parse(body);
     expect(sent.answers).toEqual([{ q: "Which app?", a: "Swiggy" }]);

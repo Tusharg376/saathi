@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useI18n } from "@/lib/i18n/provider";
 import { copyText, mailtoUrl, whatsappUrl } from "@/lib/grievance/share";
 
-const button = "flex min-h-12 items-center gap-2 rounded-full border-2 border-tarmac bg-paper px-4 font-bold active:bg-line";
+const button =
+  "flex min-h-12 items-center gap-2 rounded-full border-2 border-tarmac bg-paper px-4 font-bold active:bg-line";
 
 /**
  * Ways to take the finished letter out of the app. Each one only opens another app (or the print

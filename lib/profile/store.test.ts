@@ -19,7 +19,14 @@ describe("sanitizeProfile", () => {
 
   it("drops anything out of range or the wrong type, instead of letting it into eligibility decisions", () => {
     expect(
-      sanitizeProfile({ age: 400, state: "", workerType: "astronaut", monthlyIncomeInr: -5, hasEshram: "yes", isPlatformWorker: 1 }),
+      sanitizeProfile({
+        age: 400,
+        state: "",
+        workerType: "astronaut",
+        monthlyIncomeInr: -5,
+        hasEshram: "yes",
+        isPlatformWorker: 1,
+      }),
     ).toEqual({});
     expect(sanitizeProfile({ age: 30.5 })).toEqual({});
     expect(sanitizeProfile({ age: Number.NaN, monthlyIncomeInr: Number.POSITIVE_INFINITY })).toEqual({});
@@ -27,7 +34,10 @@ describe("sanitizeProfile", () => {
   });
 
   it("keeps the good fields next to bad ones", () => {
-    expect(sanitizeProfile({ age: 30, workerType: "nope", hasBankAccount: true })).toEqual({ age: 30, hasBankAccount: true });
+    expect(sanitizeProfile({ age: 30, workerType: "nope", hasBankAccount: true })).toEqual({
+      age: 30,
+      hasBankAccount: true,
+    });
   });
 
   it("ignores unknown keys, so nothing unexpected is ever sent to the server", () => {

@@ -179,7 +179,7 @@ export function startDictation(opts: {
       "not-allowed": "denied",
       "service-not-allowed": "denied",
       "no-speech": "no_speech",
-      "aborted": "no_speech",
+      aborted: "no_speech",
       network: "network",
     };
     opts.onError(map[e.error] ?? "other");

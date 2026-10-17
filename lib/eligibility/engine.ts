@@ -53,8 +53,10 @@ interface Criterion {
   test: (p: WorkerProfile) => boolean | undefined;
 }
 
-const between = (min: number, max: number): Criterion["test"] => (p) =>
-  p.age === undefined ? undefined : p.age >= min && p.age <= max;
+const between =
+  (min: number, max: number): Criterion["test"] =>
+  (p) =>
+    p.age === undefined ? undefined : p.age >= min && p.age <= max;
 
 const FIELD_QUESTIONS: Record<keyof WorkerProfile, string> = {
   age: "your age",
@@ -87,11 +89,7 @@ const hasBank: Criterion = {
 };
 
 export const RULES: Record<string, Criterion[]> = {
-  "scheme.eshram": [
-    { label: "Age 16 to 59", needs: "age", test: between(16, 59) },
-    notTaxpayer,
-    notEpfoEsic,
-  ],
+  "scheme.eshram": [{ label: "Age 16 to 59", needs: "age", test: between(16, 59) }, notTaxpayer, notEpfoEsic],
   "scheme.pmsym": [
     { label: "Age 18 to 40", needs: "age", test: between(18, 40) },
     {
@@ -151,8 +149,9 @@ function evaluate(schemeId: string, criteria: Criterion[], profile: WorkerProfil
   }
 
   let verdict: Verdict = failed.length > 0 ? "not_eligible" : missing.length > 0 ? "maybe" : "likely";
-  // Never promise a benefit that is only announced.
-  if (entry.status === "announced" && verdict === "likely") verdict = "maybe";
+  // Never promise a benefit that is not confirmed to be running: announced, still rolling out, or a state
+  // law whose board may not be working yet. The worker's details can match; whether they can use it is not settled.
+  if (entry.status !== "live" && verdict === "likely") verdict = "maybe";
 
   return {
     schemeId,

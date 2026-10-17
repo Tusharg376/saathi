@@ -60,13 +60,18 @@ describe("handleParse", () => {
   });
 
   it("repairs bad model output instead of returning it", async () => {
-    llm.generateJSON.mockResolvedValue({ entries: [{ ...modelEntry, date: "2030-01-01", grossInr: -5, fuelInr: 999999 }], question: "" });
+    llm.generateJSON.mockResolvedValue({
+      entries: [{ ...modelEntry, date: "2030-01-01", grossInr: -5, fuelInr: 999999 }],
+      question: "",
+    });
     const body = await (await handleParse(post({ text: "x", lang: "en", today: TODAY }))).json();
     expect(body.entries[0]).toMatchObject({ date: TODAY, grossInr: 0, fuelInr: 200000 });
   });
 
   it("never sends phone, Aadhaar or account numbers to the model", async () => {
-    await handleParse(post({ text: "aaj 1850 mile. mera phone 9876543210 aadhaar 2345 6789 0123", lang: "hi", today: TODAY }));
+    await handleParse(
+      post({ text: "aaj 1850 mile. mera phone 9876543210 aadhaar 2345 6789 0123", lang: "hi", today: TODAY }),
+    );
     const sent = JSON.stringify(llm.generateJSON.mock.calls[0][0]);
     expect(sent).not.toMatch(/9876543210|2345 6789 0123/);
     expect(sent).toContain("[PHONE]");
@@ -75,7 +80,12 @@ describe("handleParse", () => {
   it("attaches a screenshot as an image part", async () => {
     await handleParse(post({ image: { mimeType: "image/jpeg", data: "QUJD" }, lang: "hi", today: TODAY }));
     const parts = llm.generateJSON.mock.calls[0][0][0].parts;
-    expect(parts.some((p: { inlineData?: { mimeType: string; data: string } }) => p.inlineData?.mimeType === "image/jpeg" && p.inlineData?.data === "QUJD")).toBe(true);
+    expect(
+      parts.some(
+        (p: { inlineData?: { mimeType: string; data: string } }) =>
+          p.inlineData?.mimeType === "image/jpeg" && p.inlineData?.data === "QUJD",
+      ),
+    ).toBe(true);
     expect(parts[0].text).toMatch(/screenshot/i);
   });
 
@@ -112,7 +122,8 @@ describe("handleParse", () => {
 
   it("rate limits per client", async () => {
     let last = 200;
-    for (let i = 0; i < 25; i++) last = (await handleParse(post({ text: "x", lang: "hi", today: TODAY }, "9.9.9.9"))).status;
+    for (let i = 0; i < 25; i++)
+      last = (await handleParse(post({ text: "x", lang: "hi", today: TODAY }, "9.9.9.9"))).status;
     expect(last).toBe(429);
     // A different client is unaffected.
     expect((await handleParse(post({ text: "x", lang: "hi", today: TODAY }, "8.8.8.8"))).status).toBe(200);

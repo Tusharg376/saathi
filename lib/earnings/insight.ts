@@ -20,19 +20,21 @@ export function buildInsightInput(req: InsightRequest): string {
     `Period: last 7 days, ending ${req.today}. Days with entries: ${s.days}.`,
     `Earned (gross): Rs ${Math.round(s.gross)}. Cuts and penalties by platforms: Rs ${Math.round(s.deductions)}. Fuel: Rs ${Math.round(s.fuel)}.`,
     `Net (in hand): Rs ${Math.round(s.net)}.`,
-    s.netPerHour === null ? "Hourly pay: unknown (hours not entered)." : `Net per hour: Rs ${Math.round(s.netPerHour)}.`,
+    s.netPerHour === null
+      ? "Hourly pay: unknown (hours not entered)."
+      : `Net per hour: Rs ${Math.round(s.netPerHour)}.`,
     s.netChangePct === null
       ? "Compared with the 7 days before: not enough earlier data."
       : `Compared with the 7 days before: net ${s.netChangePct >= 0 ? "up" : "down"} ${Math.abs(Math.round(s.netChangePct))}%.`,
   ];
-  for (const f of req.flags as Record<string, unknown>[]) lines.push(`Flag: ${describeFlag(f)}`);
+  for (const f of req.flags) lines.push(`Flag: ${describeFlag(f)}`);
   return lines.join("\n");
 }
 
-function describeFlag(f: Record<string, unknown>): string {
+function describeFlag(f: InsightRequest["flags"][number]): string {
   switch (f.code) {
     case "high_deduction":
-      return `${f.platform ?? "A platform"} took Rs ${f.deductionsInr} (${f.ratePct}% of that day's earnings) on ${f.date}, much more than this worker's usual.`;
+      return `${f.platform || "A platform"} took Rs ${f.deductionsInr} (${f.ratePct}% of that day's earnings) on ${f.date}, much more than this worker's usual.`;
     case "hourly_drop":
       return `Net per hour is Rs ${f.currentPerHour} now, down ${f.dropPct}% from Rs ${f.previousPerHour} the week before.`;
     case "fuel_heavy":
@@ -41,7 +43,5 @@ function describeFlag(f: Record<string, unknown>): string {
       return `Worked ${f.hours} hours on ${f.date}.`;
     case "no_rest":
       return `Worked all 7 days, about ${f.avgHours} hours a day, with no rest day.`;
-    default:
-      return String(f.code);
   }
 }

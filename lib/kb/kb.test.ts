@@ -2,9 +2,22 @@ import { describe, expect, it } from "vitest";
 import { allEntries, allHelplines, getEntry, isVerified } from "./index";
 import { compactForModel, findHelplines, searchKb } from "./search";
 import { RULES } from "../eligibility/engine";
+import { Helpline, KbEntry } from "./schema";
 
 describe("KB integrity", () => {
   const entries = allEntries();
+
+  // The app trusts this data without re-checking it on every start, so this is where bad data is stopped.
+  it("every entry matches the schema", () => {
+    for (const e of entries) {
+      const parsed = KbEntry.safeParse(e);
+      expect(parsed.success, `${e.id}: ${parsed.success ? "" : parsed.error.message}`).toBe(true);
+    }
+  });
+
+  it("every helpline matches the schema", () => {
+    for (const h of allHelplines()) expect(Helpline.safeParse(h).success, h.id).toBe(true);
+  });
 
   it("has unique ids", () => {
     const ids = entries.map((e) => e.id);
@@ -12,7 +25,13 @@ describe("KB integrity", () => {
   });
 
   it("id prefix matches category", () => {
-    const prefix: Record<string, string> = { scheme: "scheme", right: "right", safety: "safety", grievance: "grievance", document: "document" };
+    const prefix: Record<string, string> = {
+      scheme: "scheme",
+      right: "right",
+      safety: "safety",
+      grievance: "grievance",
+      document: "document",
+    };
     for (const e of entries) expect(e.id.startsWith(prefix[e.category] + "."), e.id).toBe(true);
   });
 

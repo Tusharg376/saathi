@@ -38,32 +38,91 @@ interface KindRules {
 const RULES: Record<EmergencyKind, KindRules> = {
   medical: {
     latin: [
-      /\b(?:acc?id[ae]nt|axident|aksident|crash(?:ed)?|collision|injur(?:y|ed|ies)|bleed(?:ing)?|unconscious|fainted|heart attack|ambulance|fractur(?:e|ed)|broke (?:my )?(?:leg|arm|hand))\b/,
+      /\b(?:acc?id[ae]nt|axident|aksident|(?:car|bike|auto|truck|bus|road|vehicle|scooter|cab) crash(?:ed)?|crash(?:ed)? (?:into|my (?:car|bike|auto|truck|scooter|cab))|in a crash|collision|injur(?:y|ed|ies)|bleed(?:ing)?|unconscious|fainted|heart attack|ambulance|fractur(?:e|ed)|broke (?:my )?(?:leg|arm|hand))\b/,
       /\b(?:gir gaya|gir gayi|chot lag(?:i|a)|khoon|behosh|ha+dsa|dil ka daura)\b/,
     ],
     native: [
-      "दुर्घटना", "एक्सीडेंट", "एक्सिडेंट", "हादसा", "खून", "बेहोश", "चोट", "एम्बुलेंस", "एंबुलेंस", "दिल का दौरा", // Hindi
-      "अपघात", "जखमी", "बेशुद्ध", "रुग्णवाहिका", "रक्तस्राव", // Marathi
-      "விபத்து", "விபத்த", "இரத்தம்", "ரத்தம்", "மயக்கம", "காயம்", "காயத்", "ஆம்புலன்ஸ்", // Tamil
-      "ప్రమాద", "రక్తం", "స్పృహ", "గాయం", "అంబులెన్స్", // Telugu
-      "ಅಪಘಾತ", "ರಕ್ತ", "ಗಾಯ", "ಆಂಬ್ಯುಲೆನ್ಸ್", // Kannada
-      "দুর্ঘটনা", "রক্ত", "অজ্ঞান", "আহত", "অ্যাম্বুলেন্স", // Bengali
-      "અકસ્માત", "લોહી", "બેભાન", "ઈજા", "એમ્બ્યુલન્સ", // Gujarati
+      "दुर्घटना",
+      "एक्सीडेंट",
+      "एक्सिडेंट",
+      "हादसा",
+      "खून",
+      "बेहोश",
+      "चोट",
+      "एम्बुलेंस",
+      "एंबुलेंस",
+      "दिल का दौरा", // Hindi
+      "अपघात",
+      "जखमी",
+      "बेशुद्ध",
+      "रुग्णवाहिका",
+      "रक्तस्राव", // Marathi
+      "விபத்து",
+      "விபத்த",
+      "இரத்தம்",
+      "ரத்தம்",
+      "மயக்கம",
+      "காயம்",
+      "காயத்",
+      "ஆம்புலன்ஸ்", // Tamil
+      "ప్రమాద",
+      "రక్తం",
+      "స్పృహ",
+      "గాయం",
+      "అంబులెన్స్", // Telugu
+      "ಅಪಘಾತ",
+      "ರಕ್ತ",
+      "ಗಾಯ",
+      "ಆಂಬ್ಯುಲೆನ್ಸ್", // Kannada
+      "দুর্ঘটনা",
+      "রক্ত",
+      "অজ্ঞান",
+      "আহত",
+      "অ্যাম্বুলেন্স", // Bengali
+      "અકસ્માત",
+      "લોહી",
+      "બેભાન",
+      "ઈજા",
+      "એમ્બ્યુલન્સ", // Gujarati
     ],
     helplines: ["ambulance_108", "emergency_112"],
   },
   violence: {
     latin: [
-      /\b(?:attack(?:ed|ing)?|beat(?:ing|en)? me|beating me|hit me|threat(?:en|ening|ened)|kill me|kidnap(?:ped)?|rob(?:bed|bery)|mob|knife|gun|weapon|stabbed|following me)\b/,
+      /\b(?:attack(?:ed|ing)?|beat(?:ing|en)? me|beating me|hit me|threat(?:en|ening|ened)|kill me|kidnap(?:ped)?|rob(?:bed|bery)|an? (?:angry |violent )?mob|mobbed|lynch(?:ing|ed)?|knife|gun|weapon|stabbed|following me)\b/,
       /\b(?:maar rahe|maar raha|peet rahe|peet raha|dhamki|chaku|loot liya|lutera|goonde|gunde|pistol)\b/,
     ],
     native: [
-      "मार रहे", "पीट रहे", "पीट रहा", "धमकी", "चाकू", "लूट", "जान से मार", "गुंडे", "हमला", "मारहाण", // Hindi, Marathi
-      "அடிக்கிற", "மிரட்ட", "கத்தி", "தாக்க", // Tamil
-      "కొడుతున్న", "బెదిరి", "కత్తి", "దాడి", // Telugu
-      "ಹೊಡೆಯು", "ಬೆದರಿಕೆ", "ಚಾಕು", "ದಾಳಿ", // Kannada
-      "মারছে", "হুমকি", "ছুরি", "হামলা", // Bengali
-      "મારે છે", "ધમકી", "છરી", "હુમલો", // Gujarati
+      "मार रहे",
+      "पीट रहे",
+      "पीट रहा",
+      "धमकी",
+      "चाकू",
+      "लूट",
+      "जान से मार",
+      "गुंडे",
+      "हमला",
+      "मारहाण", // Hindi, Marathi
+      "அடிக்கிற",
+      "மிரட்ட",
+      "கத்தி",
+      "தாக்க", // Tamil
+      "కొడుతున్న",
+      "బెదిరి",
+      "కత్తి",
+      "దాడి", // Telugu
+      "ಹೊಡೆಯು",
+      "ಬೆದರಿಕೆ",
+      "ಚಾಕು",
+      "ದಾಳಿ", // Kannada
+      "মারছে",
+      "হুমকি",
+      "ছুরি",
+      "হামলা", // Bengali
+      "મારે છે",
+      "ધમકી",
+      "છરી",
+      "હુમલો", // Gujarati
     ],
     helplines: ["emergency_112", "police_100"],
   },
@@ -73,12 +132,20 @@ const RULES: Record<EmergencyKind, KindRules> = {
       /\b(?:chhed|chheda|chhedchhad|badtameezi)\w*/,
     ],
     native: [
-      "छेड़छाड़", "छेडछाड", "छेड़", "उत्पीड़न", // Hindi, Marathi
-      "பாலியல்", "தொல்லை", // Tamil
-      "వేధింపు", "వేధిస్తున్న", // Telugu
-      "ಕಿರುಕುಳ", "ಲೈಂಗಿಕ", // Kannada
-      "উত্যক্ত", "যৌন হয়রানি", // Bengali
-      "છેડતી", "પજવણી", // Gujarati
+      "छेड़छाड़",
+      "छेडछाड",
+      "छेड़",
+      "उत्पीड़न", // Hindi, Marathi
+      "பாலியல்",
+      "தொல்லை", // Tamil
+      "వేధింపు",
+      "వేధిస్తున్న", // Telugu
+      "ಕಿರುಕುಳ",
+      "ಲೈಂಗಿಕ", // Kannada
+      "উত্যক্ত",
+      "যৌন হয়রানি", // Bengali
+      "છેડતી",
+      "પજવણી", // Gujarati
     ],
     helplines: ["women_181", "emergency_112"],
   },
@@ -88,52 +155,91 @@ const RULES: Record<EmergencyKind, KindRules> = {
       /\b(?:police ne pakad|thane le gaye|thane mein band|hiraasat)\w*/,
     ],
     native: [
-      "पुलिस ने पकड़", "थाने ले गए", "थाने में बंद", "हिरासत", // Hindi
+      "पुलिस ने पकड़",
+      "थाने ले गए",
+      "थाने में बंद",
+      "हिरासत", // Hindi
       "கைது", // Tamil
-      "అరెస్ట్", "అదుపులో", // Telugu
-      "ಬಂಧಿಸ", "ಬಂಧನ", // Kannada
-      "গ্রেপ্তার", "থানায় নিয়ে", // Bengali
-      "ધરપકડ", "અટકાયત", // Gujarati
+      "అరెస్ట్",
+      "అదుపులో", // Telugu
+      "ಬಂಧಿಸ",
+      "ಬಂಧನ", // Kannada
+      "গ্রেপ্তার",
+      "থানায় নিয়ে", // Bengali
+      "ધરપકડ",
+      "અટકાયત", // Gujarati
     ],
     helplines: ["legal_aid_15100", "emergency_112"],
   },
   fire: {
-    latin: [/\b(?:caught fire|on fire|fire (?:in|at|broke|started)|short circuit|aag lag\w*)\b/],
+    latin: [/\b(?:caught fire|on fire|fire (?:in|at|broke|started)|aag lag\w*)\b/],
     native: ["आग लग", "தீ பிடி", "தீ விபத்து", "మంటలు", "ಬೆಂಕಿ", "আগুন"],
     nativeWords: ["आग", "આગ"],
     urgentOnMatch: true,
     helplines: ["emergency_112"],
   },
   fraud: {
+    // "Deducted" and "paise kat gaye" are how riders describe an ordinary platform cut, so they only count
+    // next to a bank or account (a scam), never alone.
     latin: [
-      /\b(?:scam(?:med)?|fraud|cheated|money (?:was |got )?(?:deducted|debited|lost|stolen)|paise (?:kat|cut) gaye|account hack(?:ed)?)\b/,
+      /\b(?:scam(?:med)?|fraud|cheated|money (?:was |got )?(?:debited|lost|stolen)|(?:account|khate|khaate|bank)\w* se (?:paise|rupaye|money) (?:kat|cut|nikal)\w*|account hack(?:ed)?)\b/,
     ],
-    native: ["ठगी", "ठग लिया", "धोखाधड़ी", "पैसे कट गए", "फ्रॉड"],
+    native: ["ठगी", "ठग लिया", "धोखाधड़ी", "खाते से पैसे", "अकाउंट से पैसे", "फ्रॉड"],
     helplines: ["cyber_1930"],
   },
 };
 
 /** Terms that are urgent on their own, with no other context needed. */
 const STRONG_LATIN = [
-  /\b(?:not breathing|can'?t breathe|cannot breathe|bleeding (?:a lot|heavily|badly)|heavy bleeding|bleeding (?:is )?not stopping|heart attack|unconscious|bachao)\b/,
+  /\b(?:not breathing|can'?t breathe|cannot breathe|(?:is|am|are) bleeding|bleeding (?:a lot|heavily|badly)|heavy bleeding|bleeding (?:is )?not stopping|heart attack|unconscious|bachao)\b/,
   /\b(?:saans nahi|behosh ho)\w*/,
   // A message that is ONLY a plea ("help!", "please help me"). "help me fill this form" must not match.
   /^(?:please\s+)?(?:help|save)(?:\s+me)?[\s.!]*$/,
 ];
-const STRONG_NATIVE = ["बचाओ", "बचा लो", "वाचवा", "காப்பாற்ற", "కాపాడండి", "ಕಾಪಾಡಿ", "বাঁচাও", "બચાવો", "बेहोश", "बेशुद्ध"];
+const STRONG_NATIVE = [
+  "बचाओ",
+  "बचा लो",
+  "वाचवा",
+  "காப்பாற்ற",
+  "కాపాడండి",
+  "ಕಾಪಾಡಿ",
+  "বাঁচাও",
+  "બચાવો",
+  "बेहोश",
+  "बेशुद्ध",
+];
 
 /** Signals that something is happening or has just happened. */
 const IMMEDIATE_LATIN = [
   /\b(?:now|right now|just now|just happened|immediately|urgent(?:ly)?|emergency|asap|abhi|jaldi|turant|foran|ho gay[ae]|ho gayi|is happening)\b/,
 ];
-const IMMEDIATE_NATIVE = ["अभी", "तुरंत", "जल्दी", "फौरन", "फ़ौरन", "உடனே", "இப்போது", "ఇప్పుడే", "ఇప్పుడు", "ಈಗ", "এখনই", "હમણાં", "आत्ता", "आता"];
+const IMMEDIATE_NATIVE = [
+  "अभी",
+  "तुरंत",
+  "जल्दी",
+  "फौरन",
+  "फ़ौरन",
+  "உடனே",
+  "இப்போது",
+  "ఇప్పుడే",
+  "ఇప్పుడు",
+  "ಈಗ",
+  "এখনই",
+  "હમણાં",
+  "आत्ता",
+  "आता",
+];
 
 /** Weaker "I need help" signals, only counted when the message is not informational. */
-const HELP_LATIN = [/\b(?:help|please)\b/];
+const HELP_LATIN = [/\b(?:help)\b/];
+/** "Please" is only a cry for help next to a physical danger: "money was deducted, please explain" is a question. */
+const PLEASE = /\bplease\b/;
 const HELP_NATIVE = ["मदद", "मदत", "உதவி", "సహాయం", "ಸಹಾಯ", "সাহায্য", "મદદ"];
 
 /** Cues that the person is asking how something works, not reporting an event. */
-const INFORMATIONAL_LATIN = [/\b(?:insurance|claim|scheme|cover(?:age)?|yojana|bima|policy|benefit|compensation|how (?:do|to|can)|kaise)\b/];
+const INFORMATIONAL_LATIN = [
+  /\b(?:insurance|claim|scheme|cover(?:age)?|yojana|bima|policy|benefit|compensation|how (?:do|to|can)|kaise)\b/,
+];
 const INFORMATIONAL_NATIVE = ["बीमा", "योजना", "क्लेम", "विमा", "காப்பீடு", "బీమా", "ವಿಮೆ", "বীমা", "વીમો"];
 
 const wordRegex = (term: string) => new RegExp(`(?<![\\p{L}\\p{M}])${term}(?![\\p{L}\\p{M}])`, "u");
@@ -181,15 +287,18 @@ const mentions = (text: string, latin: RegExp[], native: string[]): boolean =>
 /**
  * Severity for a message that names an emergency but holds no standalone distress signal.
  * Something happening now is urgent. Someone only asking how a scheme works is not an alarm at all.
+ * A request for help raises a physical danger to urgent; for a money problem alone it takes a "now" cue,
+ * so "help me understand this scam message" stays a soft note.
  */
-function severityFor(text: string, urgentKind: boolean): Severity | null {
-  if (urgentKind) return "urgent";
+function severityFor(text: string, found: KindsFound): Severity | null {
+  if (found.urgentKind) return "urgent";
 
   const informational = mentions(text, INFORMATIONAL_LATIN, INFORMATIONAL_NATIVE);
   const immediate = mentions(text, IMMEDIATE_LATIN, IMMEDIATE_NATIVE);
-  const help = mentions(text, HELP_LATIN, HELP_NATIVE);
+  const physical = found.kinds.some((k) => k !== "fraud");
+  const asksForHelp = physical && (mentions(text, HELP_LATIN, HELP_NATIVE) || PLEASE.test(text));
 
-  if (immediate || (help && !informational)) return "urgent";
+  if (immediate || (asksForHelp && !informational)) return "urgent";
   return informational ? null : "possible";
 }
 
@@ -207,6 +316,8 @@ export function detectEmergency(input: string): EmergencyResult {
   }
   if (found.kinds.length === 0) return noEmergency();
 
-  const severity = severityFor(text, found.urgentKind);
-  return severity ? { severity, kinds: found.kinds, matched: found.matched, helplines: found.helplines } : noEmergency();
+  const severity = severityFor(text, found);
+  return severity
+    ? { severity, kinds: found.kinds, matched: found.matched, helplines: found.helplines }
+    : noEmergency();
 }

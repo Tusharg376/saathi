@@ -32,7 +32,11 @@ export function localizeEntry(entry: KbEntry, lang: LangCode, tables: KbTables =
 }
 
 /** For reports: how many entries have an accepted translation in each language. */
-export function coverage(entries: readonly KbEntry[], lang: LangCode, tables: KbTables = TABLES): { translated: number; total: number } {
+export function coverage(
+  entries: readonly KbEntry[],
+  lang: LangCode,
+  tables: KbTables = TABLES,
+): { translated: number; total: number } {
   const translated = entries.filter((e) => {
     const c = tables[lang]?.[e.id] as KbTranslation | undefined;
     return c && Object.keys(acceptKbTranslation(e, c).accepted).length > 0;

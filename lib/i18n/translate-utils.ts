@@ -1,4 +1,3 @@
-import { z } from "zod";
 import type { KbEntry } from "../kb/types";
 
 /**
@@ -42,7 +41,10 @@ export function acceptUiTranslations(
     if (typeof tr !== "string" || !tr.trim()) {
       rejected.push({ key, reason: "missing or empty" });
     } else if (placeholdersOf(tr).join() !== placeholdersOf(en).join()) {
-      rejected.push({ key, reason: `placeholders differ (${placeholdersOf(en).join(",") || "none"} vs ${placeholdersOf(tr).join(",") || "none"})` });
+      rejected.push({
+        key,
+        reason: `placeholders differ (${placeholdersOf(en).join(",") || "none"} vs ${placeholdersOf(tr).join(",") || "none"})`,
+      });
     } else if (!numbersPreserved(en, tr)) {
       rejected.push({ key, reason: "a number was changed or lost" });
     } else if (tooLong(en, tr)) {
@@ -59,19 +61,16 @@ export function acceptUiTranslations(
 export const LIST_FIELDS = ["eligibility", "benefits", "how_to_apply", "documents_needed", "steps"] as const;
 
 /** The only fields of a KB entry that are translated. Ids, status, links and helplines never change. */
-export const KbTranslation = z
-  .object({
-    title: z.string(),
-    summary: z.string(),
-    status_note: z.string(),
-    eligibility: z.array(z.string()),
-    benefits: z.array(z.string()),
-    how_to_apply: z.array(z.string()),
-    documents_needed: z.array(z.string()),
-    steps: z.array(z.string()),
-  })
-  .partial();
-export type KbTranslation = z.infer<typeof KbTranslation>;
+export interface KbTranslation {
+  title?: string;
+  summary?: string;
+  status_note?: string;
+  eligibility?: string[];
+  benefits?: string[];
+  how_to_apply?: string[];
+  documents_needed?: string[];
+  steps?: string[];
+}
 
 type Check<T> = { ok: true; value: T } | { ok: false; reason: string };
 const fail = (reason: string): { ok: false; reason: string } => ({ ok: false, reason });
@@ -97,16 +96,39 @@ function checkList(en: string[] | undefined, tr: string[]): Check<string[]> {
 
 const TEXT_FIELDS = ["title", "summary", "status_note"] as const;
 
+const isStringList = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");
+
+/**
+ * The translation as a typed object, or null if it is not shaped like one: an object whose known
+ * fields are text or lists of text. Unknown keys are ignored. Written by hand instead of with the
+ * schema library because this runs in the browser, and the library would add its full size to the app.
+ */
+function readTranslation(candidate: unknown): KbTranslation | null {
+  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate)) return null;
+  const c = candidate as Record<string, unknown>;
+  const out: KbTranslation = {};
+  for (const field of TEXT_FIELDS) {
+    if (c[field] === undefined) continue;
+    if (typeof c[field] !== "string") return null;
+    out[field] = c[field];
+  }
+  for (const field of LIST_FIELDS) {
+    if (c[field] === undefined) continue;
+    if (!isStringList(c[field])) return null;
+    out[field] = c[field];
+  }
+  return out;
+}
+
 export function acceptKbTranslation(
   entry: KbEntry,
   candidate: unknown,
 ): { accepted: KbTranslation; rejected: Rejection[] } {
-  const parsed = KbTranslation.safeParse(candidate);
-  if (!parsed.success) return { accepted: {}, rejected: [{ key: entry.id, reason: "not the expected shape" }] };
+  const c = readTranslation(candidate);
+  if (!c) return { accepted: {}, rejected: [{ key: entry.id, reason: "not the expected shape" }] };
 
   const accepted: KbTranslation = {};
   const rejected: Rejection[] = [];
-  const c = parsed.data;
 
   for (const field of TEXT_FIELDS) {
     if (c[field] === undefined) continue;

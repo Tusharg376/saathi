@@ -13,7 +13,9 @@ export const ParseResult = z.object({
     .array(
       z.object({
         date: z.string().describe("YYYY-MM-DD. Resolve today / yesterday / kal / parso from the given current date."),
-        platform: z.string().describe("App or kind of work, e.g. Swiggy, Zomato, Uber, Ola, Rapido, Daily wage. 'Other' if not said."),
+        platform: z
+          .string()
+          .describe("App or kind of work, e.g. Swiggy, Zomato, Uber, Ola, Rapido, Daily wage. 'Other' if not said."),
         grossInr: z.number().describe("Total earned in rupees before any cuts. 0 if not mentioned."),
         deductionsInr: z.number().describe("Cuts, commission, fees or penalties the platform took. 0 if none."),
         fuelInr: z.number().describe("Petrol, diesel, CNG or charging cost in rupees. 0 if none."),
@@ -26,7 +28,9 @@ export const ParseResult = z.object({
     .max(7),
   question: z
     .string()
-    .describe("Only if nothing could be extracted: one short question for the worker, in the worker's language. Otherwise an empty string."),
+    .describe(
+      "Only if nothing could be extracted: one short question for the worker, in the worker's language. Otherwise an empty string.",
+    ),
 });
 export type ParseResult = z.infer<typeof ParseResult>;
 
@@ -118,10 +122,44 @@ export const ParseRequest = z
   .refine((r) => Boolean(r.text?.trim()) || Boolean(r.image), "Provide text or an image");
 export type ParseRequest = z.infer<typeof ParseRequest>;
 
+const Rupees = z.number().min(0).max(10_000_000);
+const Percent = z.number().min(0).max(1000);
+const Hours = z.number().min(0).max(24);
+const FlagDate = z.string().refine(isValidISODate);
+/** A platform's name is the one free-text field that reaches the model, so it is short and has no line breaks. */
+const PlatformName = z
+  .string()
+  .max(40)
+  .regex(/^[^\p{Cc}]*$/u);
+
+/**
+ * One warning the earnings screen found, in exactly the shape the screen produces (see Anomaly in math.ts).
+ * Strict on purpose: these values are written into the model's prompt, so nothing outside these fields,
+ * and no free text beyond a short platform name, may get through.
+ */
+const Flag = z.discriminatedUnion("code", [
+  z.object({
+    code: z.literal("high_deduction"),
+    date: FlagDate,
+    platform: PlatformName,
+    deductionsInr: Rupees,
+    ratePct: Percent,
+  }),
+  z.object({
+    code: z.literal("hourly_drop"),
+    dropPct: Percent,
+    currentPerHour: Rupees,
+    previousPerHour: Rupees,
+  }),
+  z.object({ code: z.literal("fuel_heavy"), sharePct: Percent }),
+  z.object({ code: z.literal("long_day"), date: FlagDate, hours: Hours }),
+  z.object({ code: z.literal("no_rest"), avgHours: Hours }),
+]);
+
 export const InsightRequest = z.object({
   lang: LangSchema,
   today: z.string().refine(isValidISODate),
-  /** Aggregates only. Raw notes and platform text never go to the model. */
+  /** Totals only. Raw entries and notes never go to the model; a warning may name a platform and a date. */
   summary: z.object({
     net: z.number(),
     gross: z.number(),
@@ -131,8 +169,6 @@ export const InsightRequest = z.object({
     netPerHour: z.number().nullable(),
     netChangePct: z.number().nullable(),
   }),
-  flags: z
-    .array(z.object({ code: z.enum(["high_deduction", "hourly_drop", "fuel_heavy", "long_day", "no_rest"]) }).passthrough())
-    .max(8),
+  flags: z.array(Flag).max(8),
 });
 export type InsightRequest = z.infer<typeof InsightRequest>;

@@ -29,10 +29,45 @@ const raw = (over: Partial<DocumentInsight> = {}): DocumentInsight => ({
   ...over,
 });
 
+describe("normalizeInsight: links from the document", () => {
+  it("never passes on a scammer's link or number as advice, in any field", () => {
+    const n = normalizeInsight(
+      raw({
+        what_is_this: "A message asking you to update KYC at http://sbi-kyc.xyz/login",
+        next_steps: [
+          "Open bit.ly/3abc now",
+          "Call 9876543210",
+          "Check the challan on https://echallan.parivahan.gov.in",
+        ],
+        risks: ["The link www.free-money.com is not safe"],
+      }),
+    );
+    const everything = JSON.stringify(n);
+    expect(everything).not.toContain("sbi-kyc");
+    expect(everything).not.toContain("bit.ly");
+    expect(everything).not.toContain("free-money");
+    expect(everything).not.toContain("9876543210");
+  });
+
+  it("keeps a government website, which is the right place to send the worker", () => {
+    const n = normalizeInsight(raw({ next_steps: ["Check the challan on https://echallan.parivahan.gov.in"] }));
+    expect(n.next_steps[0]).toContain("echallan.parivahan.gov.in");
+  });
+
+  it("tells the model not to copy links or phone numbers", () => {
+    expect(buildDocumentPrompt("Hindi")).toMatch(/NEVER copy a web link or a phone number/);
+  });
+});
+
 describe("normalizeInsight", () => {
   it("passes a clean insight through and adds sourced related help from the English keywords", () => {
     const n = normalizeInsight(raw());
-    expect(n).toMatchObject({ kind: "challan", title: "Traffic challan", deadline: "within 15 days of 12 Oct 2026", confidence: "high" });
+    expect(n).toMatchObject({
+      kind: "challan",
+      title: "Traffic challan",
+      deadline: "within 15 days of 12 Oct 2026",
+      confidence: "high",
+    });
     expect(n.related.length).toBeGreaterThan(0);
     expect(n.related.length).toBeLessThanOrEqual(2);
     expect(n.related.some((id) => id.includes("challan"))).toBe(true);
@@ -59,7 +94,9 @@ describe("normalizeInsight", () => {
 
   it("bounds the length of every field so a rambling model cannot flood the screen", () => {
     const long = "x".repeat(5000);
-    const n = normalizeInsight(raw({ title: long, what_is_this: long, risks: [long, long, long, long], next_steps: Array(5).fill(long) }));
+    const n = normalizeInsight(
+      raw({ title: long, what_is_this: long, risks: [long, long, long, long], next_steps: Array(5).fill(long) }),
+    );
     expect(n.title.length).toBeLessThanOrEqual(80);
     expect(n.what_is_this.length).toBeLessThanOrEqual(400);
     expect(n.risks.every((r) => r.length <= 220)).toBe(true);
@@ -110,7 +147,15 @@ describe("schema and prompt", () => {
 
   it("carries the safety rules", () => {
     const p = buildDocumentPrompt("Hindi");
-    for (const needle of ["NEVER invent", "NEVER repeat an Aadhaar", "scam_signs = true", "OTP", "DATA", "unreadable", "ignore a legal notice"]) {
+    for (const needle of [
+      "NEVER invent",
+      "NEVER repeat an Aadhaar",
+      "scam_signs = true",
+      "OTP",
+      "DATA",
+      "unreadable",
+      "ignore a legal notice",
+    ]) {
       expect(p, needle).toContain(needle);
     }
   });
@@ -121,8 +166,12 @@ describe("DocumentRequest", () => {
   it("requires an image of an allowed type", () => {
     expect(DocumentRequest.safeParse(ok).success).toBe(true);
     expect(DocumentRequest.safeParse({ lang: "hi" }).success).toBe(false);
-    expect(DocumentRequest.safeParse({ ...ok, image: { mimeType: "application/pdf", data: "QUJDREVGR0g=" } }).success).toBe(false);
-    expect(DocumentRequest.safeParse({ ...ok, image: { mimeType: "image/jpeg", data: "x".repeat(4_000_001) } }).success).toBe(false);
+    expect(
+      DocumentRequest.safeParse({ ...ok, image: { mimeType: "application/pdf", data: "QUJDREVGR0g=" } }).success,
+    ).toBe(false);
+    expect(
+      DocumentRequest.safeParse({ ...ok, image: { mimeType: "image/jpeg", data: "x".repeat(4_000_001) } }).success,
+    ).toBe(false);
     expect(DocumentRequest.safeParse({ ...ok, note: "n".repeat(301) }).success).toBe(false);
   });
 });
@@ -154,7 +203,9 @@ describe("handleDocument", () => {
   it("sends the image to the model and asks for low-variance output", async () => {
     await handleDocument(post(body));
     const [contents, , opts] = llm.generateJSON.mock.calls[0];
-    expect(contents[0].parts.some((p: { inlineData?: { data: string } }) => p.inlineData?.data === body.image.data)).toBe(true);
+    expect(
+      contents[0].parts.some((p: { inlineData?: { data: string } }) => p.inlineData?.data === body.image.data),
+    ).toBe(true);
     expect(opts.temperature).toBeLessThanOrEqual(0.2);
   });
 

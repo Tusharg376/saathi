@@ -12,11 +12,15 @@ interface Pattern {
 
 const PATTERNS: Pattern[] = [
   { label: "EMAIL", re: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
-  { label: "UPI", re: /\b[\w.-]{2,}@(?:ok(?:axis|hdfcbank|icici|sbi)|ybl|ibl|axl|paytm|upi|apl|oksbi|sbi|hdfcbank|icici|axisbank)\b/gi },
+  {
+    label: "UPI",
+    re: /\b[\w.-]{2,}@(?:ok(?:axis|hdfcbank|icici|sbi)|ybl|ibl|axl|paytm|upi|apl|oksbi|sbi|hdfcbank|icici|axisbank)\b/gi,
+  },
   { label: "AADHAAR", re: /\b[2-9]\d{3}[\s-]?\d{4}[\s-]?\d{4}\b/g },
   { label: "PAN", re: /\b[A-Z]{5}\d{4}[A-Z]\b/g },
   { label: "IFSC", re: /\b[A-Z]{4}0[A-Z0-9]{6}\b/g },
-  { label: "PHONE", re: /(?<!\d)(?:\+91[\s-]?|0)?[6-9]\d{9}(?!\d)/g },
+  // Ten digits, written together or split 5 + 5 ("98765 43210"), with or without +91 or a leading 0.
+  { label: "PHONE", re: /(?<!\d)(?:\+91[\s-]?|0)?[6-9]\d{4}[\s-]?\d{5}(?!\d)/g },
   { label: "ACCOUNT", re: /(?<!\d)\d{9,18}(?!\d)/g },
 ];
 

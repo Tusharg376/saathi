@@ -83,7 +83,7 @@ export function FallbackCards({ ids }: { ids: string[] }) {
   const { t } = useI18n();
   return (
     <div className="space-y-3">
-      <h3 className="font-extrabold">{t("chat.fallback.title")}</h3>
+      <h2 className="font-extrabold">{t("chat.fallback.title")}</h2>
       {entriesOf(ids).map((e) => (
         <KbCard key={e.id} entry={e} showActions={false} />
       ))}
@@ -96,7 +96,7 @@ export function SourcesList({ ids }: { ids: string[] }) {
   const { t } = useI18n();
   return (
     <div>
-      <h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-ink-soft">{t("chat.sources")}</h3>
+      <h2 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-ink-soft">{t("chat.sources")}</h2>
       <ul className="space-y-2">
         {entriesOf(ids).map((e) => (
           <li key={e.id}>

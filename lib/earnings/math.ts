@@ -120,7 +120,8 @@ export interface WeekComparison {
 export function compareWeeks(entries: EarningEntry[], today: string): WeekComparison {
   const current = summarize(inRange(entries, addDays(today, -6), today));
   const previous = summarize(inRange(entries, addDays(today, -13), addDays(today, -7)));
-  const pct = (a: number | null, b: number | null) => (a === null || b === null || b === 0 ? null : ((a - b) / Math.abs(b)) * 100);
+  const pct = (a: number | null, b: number | null) =>
+    a === null || b === null || b === 0 ? null : ((a - b) / Math.abs(b)) * 100;
   return {
     current,
     previous,
@@ -190,7 +191,9 @@ const largeCuts: Rule = ({ all, last14 }) => {
   const cutoff = Math.max(THRESHOLDS.minDeductionRate, usual * 2);
 
   return last14
-    .filter((e) => e.grossInr > 0 && e.deductionsInr >= THRESHOLDS.minDeductionInr && e.deductionsInr / e.grossInr >= cutoff)
+    .filter(
+      (e) => e.grossInr > 0 && e.deductionsInr >= THRESHOLDS.minDeductionInr && e.deductionsInr / e.grossInr >= cutoff,
+    )
     .sort((a, b) => b.deductionsInr - a.deductionsInr)
     .slice(0, 2)
     .map((e) => ({
@@ -246,7 +249,9 @@ const noRest: Rule = ({ last7 }) => {
   if (days.length < 7 || hours.some((h) => h <= 0)) return [];
 
   const avg = sum(hours) / 7;
-  return avg >= THRESHOLDS.noRestAvgHours ? [{ code: "no_rest", severity: "warn", avgHours: Math.round(avg * 10) / 10 }] : [];
+  return avg >= THRESHOLDS.noRestAvgHours
+    ? [{ code: "no_rest", severity: "warn", avgHours: Math.round(avg * 10) / 10 }]
+    : [];
 };
 
 const RULES: Rule[] = [largeCuts, hourlyDrop, fuelHeavy, longDay, noRest];
@@ -289,11 +294,37 @@ function csvCell(v: string | number | undefined): string {
 }
 
 export function toCsv(entries: EarningEntry[]): string {
-  const header = ["date", "platform", "gross_inr", "deductions_inr", "fuel_inr", "other_cost_inr", "net_inr", "orders", "hours", "km", "notes"];
+  const header = [
+    "date",
+    "platform",
+    "gross_inr",
+    "deductions_inr",
+    "fuel_inr",
+    "other_cost_inr",
+    "net_inr",
+    "orders",
+    "hours",
+    "km",
+    "notes",
+  ];
   const rows = [...entries]
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((e) =>
-      [e.date, e.platform, e.grossInr, e.deductionsInr, e.fuelInr, e.otherCostInr, netOf(e), e.orders, e.hours, e.km, e.notes].map(csvCell).join(","),
+      [
+        e.date,
+        e.platform,
+        e.grossInr,
+        e.deductionsInr,
+        e.fuelInr,
+        e.otherCostInr,
+        netOf(e),
+        e.orders,
+        e.hours,
+        e.km,
+        e.notes,
+      ]
+        .map(csvCell)
+        .join(","),
     );
   return [header.join(","), ...rows].join("\r\n");
 }

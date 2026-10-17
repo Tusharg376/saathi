@@ -10,9 +10,17 @@ import type { WorkerProfile, WorkerType } from "../eligibility/engine";
 const KEY = "saathi.profile";
 const EVENT = "saathi-profile-change";
 
-const WORKER_TYPES: readonly WorkerType[] = ["delivery", "cab_driver", "construction", "domestic", "street_vendor", "other"];
+const WORKER_TYPES: readonly WorkerType[] = [
+  "delivery",
+  "cab_driver",
+  "construction",
+  "domestic",
+  "street_vendor",
+  "other",
+];
 
-const isNum = (v: unknown, min: number, max: number): v is number => typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
+const isNum = (v: unknown, min: number, max: number): v is number =>
+  typeof v === "number" && Number.isFinite(v) && v >= min && v <= max;
 
 /**
  * Keeps only well-formed fields. Storage can be edited or corrupted, and a profile feeds

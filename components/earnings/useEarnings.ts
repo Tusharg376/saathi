@@ -43,10 +43,7 @@ export function useEarnings() {
 }
 
 export type InsightState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "done"; text: string }
-  | { status: "error"; key: MessageKey };
+  { status: "idle" } | { status: "loading" } | { status: "done"; text: string } | { status: "error"; key: MessageKey };
 
 const INSIGHT_ERROR: Record<FailureKind, MessageKey> = {
   no_key: "chat.error.no_key.title",

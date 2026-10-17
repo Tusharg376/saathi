@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LANG, HELPLINE_LABEL, LANGUAGES, en, hi, isLangCode, translate, type MessageKey } from "./messages";
+import {
+  DEFAULT_LANG,
+  HELPLINE_LABEL,
+  LANGUAGES,
+  en,
+  hi,
+  isInterfaceComplete,
+  isLangCode,
+  translate,
+  type MessageKey,
+} from "./messages";
 import { LangSchema } from "./lang-schema";
 import { getHelpline } from "../kb";
 
@@ -66,5 +76,40 @@ describe("helpline labels", () => {
       expect(getHelpline(id), id).toBeDefined();
       expect(en[key], key).toBeTruthy();
     }
+  });
+});
+
+describe("isInterfaceComplete", () => {
+  const some = (n: number): Record<string, string> =>
+    Object.fromEntries(
+      Object.keys(en)
+        .slice(0, n)
+        .map((k) => [k, "x"]),
+    );
+  const total = Object.keys(en).length;
+
+  it("English and Hindi have their own screens", () => {
+    expect(isInterfaceComplete("en")).toBe(true);
+    expect(isInterfaceComplete("hi")).toBe(true);
+  });
+
+  it("a language with no translation yet is not complete, so the picker can say the screens are in English", () => {
+    expect(isInterfaceComplete("ta", { ta: {} })).toBe(false);
+    expect(isInterfaceComplete("ta", {})).toBe(false);
+  });
+
+  it("a language with only some strings is not complete either", () => {
+    expect(isInterfaceComplete("ta", { ta: some(Math.floor(total / 2)) })).toBe(false);
+  });
+
+  it("a language with nearly every string is complete", () => {
+    expect(isInterfaceComplete("ta", { ta: some(total) })).toBe(true);
+    expect(isInterfaceComplete("ta", { ta: some(Math.ceil(total * 0.96)) })).toBe(true);
+  });
+
+  it("ignores empty strings and keys that are not in the catalogue", () => {
+    const blanks = Object.fromEntries(Object.keys(en).map((k) => [k, ""]));
+    expect(isInterfaceComplete("ta", { ta: blanks })).toBe(false);
+    expect(isInterfaceComplete("ta", { ta: { not_a_key: "x" } as never })).toBe(false);
   });
 });

@@ -61,7 +61,9 @@ async function translateLanguage(code: LangCode, dry: boolean) {
   }
 
   const total = Object.keys(en).length;
-  console.log(`\n${code} (${language}): ${Object.keys(result).length}/${total} strings kept, ${rejected.length} rejected`);
+  console.log(
+    `\n${code} (${language}): ${Object.keys(result).length}/${total} strings kept, ${rejected.length} rejected`,
+  );
   for (const r of rejected) console.log(`   skipped ${r.key}: ${r.reason}`);
 
   if (!dry) {
@@ -86,7 +88,9 @@ async function main() {
   const targets = (asked.length ? asked : DEFAULT_TARGETS) as LangCode[];
 
   for (const code of targets) await translateLanguage(code, dry);
-  console.log(dry ? "\nDry run: nothing written." : "\nDone. Please have a native speaker review lib/i18n/generated/*.json.");
+  console.log(
+    dry ? "\nDry run: nothing written." : "\nDone. Please have a native speaker review lib/i18n/generated/*.json.",
+  );
 }
 
 main().catch((err) => {

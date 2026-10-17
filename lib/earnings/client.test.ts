@@ -17,7 +17,10 @@ const entry = { date: "2026-10-17", platform: "Swiggy", grossInr: 1850, deductio
 
 describe("requestParse", () => {
   it("returns entries to confirm", async () => {
-    expect(await requestParse(parseReq, reply(200, { entries: [entry] }))).toEqual({ kind: "entries", entries: [entry] });
+    expect(await requestParse(parseReq, reply(200, { entries: [entry] }))).toEqual({
+      kind: "entries",
+      entries: [entry],
+    });
   });
   it("returns the model's question when nothing could be read", async () => {
     expect(await requestParse(parseReq, reply(200, { entries: [], question: "Kitne rupaye?" }))).toEqual({
@@ -45,7 +48,10 @@ describe("requestInsight", () => {
     flags: [],
   };
   it("returns the explanation text", async () => {
-    expect(await requestInsight(req, reply(200, { text: "Is hafte..." }))).toEqual({ kind: "text", text: "Is hafte..." });
+    expect(await requestInsight(req, reply(200, { text: "Is hafte..." }))).toEqual({
+      kind: "text",
+      text: "Is hafte...",
+    });
   });
   it("maps failures", async () => {
     expect(await requestInsight(req, reply(503, { error: "no_key" }))).toEqual({ kind: "no_key" });

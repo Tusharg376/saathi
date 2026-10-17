@@ -23,7 +23,13 @@ export function TriState({ label, value, onChange }: { label: string; value: Tri
               value === o.value ? "bg-tarmac text-white" : "bg-paper"
             }`}
           >
-            <input type="radio" className="sr-only" name={label} checked={value === o.value} onChange={() => onChange(o.value)} />
+            <input
+              type="radio"
+              className="sr-only"
+              name={label}
+              checked={value === o.value}
+              onChange={() => onChange(o.value)}
+            />
             {t(o.key)}
           </label>
         ))}

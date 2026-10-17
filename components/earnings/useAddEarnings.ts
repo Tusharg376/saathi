@@ -6,13 +6,7 @@ import type { MessageKey } from "@/lib/i18n/messages";
 import { addEntries } from "@/lib/db";
 import { todayISO } from "@/lib/earnings/dates";
 import { requestParse, type ParseOutcome } from "@/lib/earnings/client";
-import {
-  draftFromEntry,
-  emptyDraft,
-  validateDrafts,
-  type Draft,
-  type DraftErrors,
-} from "@/lib/earnings/draft";
+import { draftFromEntry, emptyDraft, validateDrafts, type Draft, type DraftErrors } from "@/lib/earnings/draft";
 import type { NewEntry } from "@/lib/earnings/math";
 import { ImageError, fileToJpeg } from "@/lib/image/downscale";
 
@@ -56,7 +50,10 @@ export function useAddEarnings(onSaved: () => void) {
     }
   };
 
-  const read = async (kind: "text" | "photo", body: { text?: string; image?: { mimeType: "image/jpeg"; data: string } }) => {
+  const read = async (
+    kind: "text" | "photo",
+    body: { text?: string; image?: { mimeType: "image/jpeg"; data: string } },
+  ) => {
     setBusy(kind);
     setNotice(null);
     setQuestion("");

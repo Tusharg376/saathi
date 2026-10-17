@@ -43,6 +43,6 @@ export function toInsightRequest(d: Dashboard, today: string, lang: InsightReque
       netPerHour: s.netPerHour,
       netChangePct: d.week.netChangePct,
     },
-    flags: d.flags as InsightRequest["flags"],
+    flags: d.flags,
   };
 }

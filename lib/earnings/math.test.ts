@@ -101,7 +101,12 @@ describe("dailyTotals", () => {
 
 describe("compareWeeks", () => {
   it("compares the last 7 days with the 7 before", () => {
-    const es = [ago(0, { grossInr: 1200 }), ago(3, { grossInr: 800 }), ago(8, { grossInr: 1000 }), ago(12, { grossInr: 1000 })];
+    const es = [
+      ago(0, { grossInr: 1200 }),
+      ago(3, { grossInr: 800 }),
+      ago(8, { grossInr: 1000 }),
+      ago(12, { grossInr: 1000 }),
+    ];
     const c = compareWeeks(es, TODAY);
     expect(c.current.net).toBe(2000);
     expect(c.previous.net).toBe(2000);
@@ -188,7 +193,9 @@ describe("detectAnomalies", () => {
   });
 
   it("does not judge fuel on a tiny week", () => {
-    expect(detectAnomalies([ago(0, { grossInr: 300, fuelInr: 250 })], TODAY).some((a) => a.code === "fuel_heavy")).toBe(false);
+    expect(detectAnomalies([ago(0, { grossInr: 300, fuelInr: 250 })], TODAY).some((a) => a.code === "fuel_heavy")).toBe(
+      false,
+    );
   });
 
   it("nudges about a very long day", () => {
@@ -228,7 +235,9 @@ describe("toCsv", () => {
   it("writes a header, one row per entry, sorted by date, with net", () => {
     const csv = toCsv([ago(0, { grossInr: 1000, fuelInr: 100 }), ago(1, { grossInr: 500 })]);
     const lines = csv.split("\r\n");
-    expect(lines[0]).toBe("date,platform,gross_inr,deductions_inr,fuel_inr,other_cost_inr,net_inr,orders,hours,km,notes");
+    expect(lines[0]).toBe(
+      "date,platform,gross_inr,deductions_inr,fuel_inr,other_cost_inr,net_inr,orders,hours,km,notes",
+    );
     expect(lines).toHaveLength(3);
     expect(lines[1].startsWith(addDays(TODAY, -1))).toBe(true);
     expect(lines[2]).toContain(",900,");
@@ -240,7 +249,7 @@ describe("toCsv", () => {
   });
 
   it("neutralises spreadsheet formula injection in free text", () => {
-    const csv = toCsv([ago(0, { platform: "=HYPERLINK(\"http://evil\")", notes: "+1+1" })]);
+    const csv = toCsv([ago(0, { platform: '=HYPERLINK("http://evil")', notes: "+1+1" })]);
     expect(csv).not.toMatch(/(^|,)=HYPERLINK/);
     expect(csv).toContain("'=HYPERLINK");
     expect(csv).toContain("'+1+1");

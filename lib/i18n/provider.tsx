@@ -2,8 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { DEFAULT_LANG, LANGUAGES, isLangCode, translate, type LangCode, type MessageKey } from "./messages";
+import { LANG_COOKIE } from "./pick-language";
 
-const STORAGE_KEY = "saathi.lang";
+/** The same name is used on this phone (localStorage) and in the cookie the server reads. */
+const STORAGE_KEY = LANG_COOKIE;
+const ONE_YEAR = 60 * 60 * 24 * 365;
 
 interface I18n {
   lang: LangCode;
@@ -32,15 +35,30 @@ function detectFromBrowser(): LangCode | null {
   return null;
 }
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  // The server and first client render both use DEFAULT_LANG so hydration matches.
-  const [lang, setLangState] = useState<LangCode>(DEFAULT_LANG);
+/** Lets the server know the choice, so the next visit's first page is already in this language. */
+function rememberForServer(l: LangCode): void {
+  const secure = location.protocol === "https:" ? "; secure" : "";
+  document.cookie = `${STORAGE_KEY}=${l}; path=/; max-age=${ONE_YEAR}; samesite=lax${secure}`;
+}
+
+interface Props {
+  children: ReactNode;
+  /** The language the server wrote the page in. Starting from it keeps hydration identical to that HTML. */
+  serverLang?: LangCode;
+}
+
+export function I18nProvider({ children, serverLang }: Props) {
+  // The server render and the first client render must match, so both start from the same language.
+  const [lang, setLangState] = useState<LangCode>(serverLang ?? DEFAULT_LANG);
 
   useEffect(() => {
-    const next = readStored() ?? detectFromBrowser() ?? DEFAULT_LANG;
+    const stored = readStored();
+    // A choice made before the server could see it (an older visit) is passed on now.
+    if (stored) rememberForServer(stored);
+    const next = stored ?? serverLang ?? detectFromBrowser() ?? DEFAULT_LANG;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- must wait for the browser to read the saved language
     setLangState(next);
-  }, []);
+  }, [serverLang]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -48,6 +66,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: LangCode) => {
     setLangState(l);
+    rememberForServer(l);
     try {
       localStorage.setItem(STORAGE_KEY, l);
     } catch {

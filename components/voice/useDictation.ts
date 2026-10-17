@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useI18n } from "@/lib/i18n/provider";
 import type { MessageKey } from "@/lib/i18n/messages";
-import { appendDictation, startDictation, supportsSpeechInput, type Dictation, type DictationError } from "@/lib/voice/speech";
+import {
+  appendDictation,
+  startDictation,
+  supportsSpeechInput,
+  type Dictation,
+  type DictationError,
+} from "@/lib/voice/speech";
 
 /** Errors worth telling the worker about. A silent pause ("no speech") is not one. */
 const ERROR_KEY: Partial<Record<DictationError, MessageKey>> = {

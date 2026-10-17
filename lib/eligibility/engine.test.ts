@@ -76,7 +76,8 @@ describe("eligibility engine", () => {
   it("worker type gates SVANidhi and BOCW", () => {
     expect(verdictOf({ workerType: "street_vendor" }, "scheme.pmsvanidhi")).toBe("likely");
     expect(verdictOf({ workerType: "delivery" }, "scheme.pmsvanidhi")).toBe("not_eligible");
-    expect(verdictOf({ workerType: "construction", age: 35 }, "scheme.bocw")).toBe("likely");
+    // Construction welfare boards differ by state and are not all working, so a match is "maybe", never "likely".
+    expect(verdictOf({ workerType: "construction", age: 35 }, "scheme.bocw")).toBe("maybe");
     expect(verdictOf({ workerType: "construction", age: 61 }, "scheme.bocw")).toBe("not_eligible");
   });
 
@@ -84,8 +85,17 @@ describe("eligibility engine", () => {
     const { results } = checkEligibility({ isPlatformWorker: true, state: "Karnataka" });
     const stateActs = results.filter((r) => r.schemeId.startsWith("right.gig_act_"));
     expect(stateActs.map((r) => r.schemeId)).toEqual(["right.gig_act_karnataka"]);
-    expect(stateActs[0].verdict).toBe("likely");
+    // The law may exist and the worker may match it, but registration is not confirmed open: "maybe", with the reason.
+    expect(stateActs[0].verdict).toBe("maybe");
     expect(stateActs[0].status).toBe("state_specific");
+    expect(stateActs[0].status_note).toBeTruthy();
+  });
+
+  it("never says likely for anything that is not confirmed to be running", () => {
+    const profile: WorkerProfile = { ...young, isPlatformWorker: true, hasEshram: true, workerType: "construction" };
+    for (const r of checkEligibility({ ...profile, state: "Karnataka" }).results) {
+      if (r.status !== "live") expect(r.verdict, `${r.schemeId} is ${r.status}`).not.toBe("likely");
+    }
   });
 
   it("asks for the state when unknown instead of listing every state", () => {

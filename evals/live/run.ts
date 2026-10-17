@@ -51,7 +51,11 @@ async function judge(rubric: string, userMessage: string, reply: string, sourceI
     .join("\n");
   const v = await withRetry(() =>
     generateJSON(
-      [userText(`RUBRIC:\n${rubric}\n\nWORKER'S MESSAGE:\n${userMessage}\n\nASSISTANT'S REPLY:\n${reply}\n\nKNOWLEDGE-BASE FACTS AVAILABLE:\n${facts || "(none)"}`)],
+      [
+        userText(
+          `RUBRIC:\n${rubric}\n\nWORKER'S MESSAGE:\n${userMessage}\n\nASSISTANT'S REPLY:\n${reply}\n\nKNOWLEDGE-BASE FACTS AVAILABLE:\n${facts || "(none)"}`,
+        ),
+      ],
       Verdict,
       { model: "primary", system: JUDGE_SYSTEM, temperature: 0 },
     ),
@@ -65,7 +69,9 @@ async function runChatCase(c: ChatCase, useJudge: boolean): Promise<Outcome[]> {
   let emergency = false;
   let error: string | null = null;
 
-  for await (const ev of withRetryGen(() => runChat({ messages: [{ role: "user", text: c.message }], lang: c.lang, profile: c.profile }))) {
+  for await (const ev of withRetryGen(() =>
+    runChat({ messages: [{ role: "user", text: c.message }], lang: c.lang, profile: c.profile }),
+  )) {
     if (ev.type === "text") text += ev.text;
     else if (ev.type === "sources" || ev.type === "fallback") ev.ids.forEach((id) => sourceIds.add(id));
     else if (ev.type === "emergency") emergency = true;
@@ -79,7 +85,11 @@ async function runChatCase(c: ChatCase, useJudge: boolean): Promise<Outcome[]> {
     const o = evaluateCheck(check, result);
     if (o) out.push(o);
     else if (check.kind === "judge") {
-      out.push(useJudge ? await judge(check.rubric, c.message, text, result.sourceIds) : { check, pass: true, detail: "skipped (--no-judge)" });
+      out.push(
+        useJudge
+          ? await judge(check.rubric, c.message, text, result.sourceIds)
+          : { check, pass: true, detail: "skipped (--no-judge)" },
+      );
     }
   }
   return out;
@@ -107,7 +117,10 @@ async function runParseCase(c: ParseCase): Promise<Outcome[]> {
     ),
   );
   const body = (await res.json()) as { entries?: Parameters<typeof evaluateParse>[1]; error?: string };
-  if (!res.ok) return [{ check: { kind: "judge", rubric: "parse responded" }, pass: false, detail: body.error ?? `HTTP ${res.status}` }];
+  if (!res.ok)
+    return [
+      { check: { kind: "judge", rubric: "parse responded" }, pass: false, detail: body.error ?? `HTTP ${res.status}` },
+    ];
   return evaluateParse(c.expect, body.entries ?? []);
 }
 
@@ -121,13 +134,73 @@ async function runGrievanceCase(c: GrievanceCase): Promise<Outcome[]> {
       }),
     ),
   );
-  const body = (await res.json()) as { draft?: { needsInfo: boolean; questions: string[]; letter: string }; error?: string };
-  if (!res.ok || !body.draft) return [{ check: { kind: "judge", rubric: "grievance responded" }, pass: false, detail: body.error ?? `HTTP ${res.status}` }];
+  const body = (await res.json()) as {
+    draft?: { needsInfo: boolean; questions: string[]; letter: string };
+    error?: string;
+  };
+  if (!res.ok || !body.draft)
+    return [
+      {
+        check: { kind: "judge", rubric: "grievance responded" },
+        pass: false,
+        detail: body.error ?? `HTTP ${res.status}`,
+      },
+    ];
   if (body.draft.needsInfo) {
     const n = body.draft.questions.length;
-    return [{ check: { kind: "judge", rubric: "asks a few questions when details are missing" }, pass: n >= 1 && n <= 3, detail: `asked ${n} question(s)` }];
+    return [
+      {
+        check: { kind: "judge", rubric: "asks a few questions when details are missing" },
+        pass: n >= 1 && n <= 3,
+        detail: `asked ${n} question(s)`,
+      },
+    ];
   }
   return evaluateLetter(c.expect, body.draft.letter);
+}
+
+interface Options {
+  only?: string;
+  area?: string;
+  delay: number;
+  useJudge: boolean;
+}
+
+function readOptions(args: string[]): Options {
+  const flag = (name: string) => {
+    const i = args.indexOf(name);
+    return i >= 0 ? args[i + 1] : undefined;
+  };
+  return {
+    only: flag("--only"),
+    area: flag("--area"),
+    delay: Number(flag("--delay") ?? 4000),
+    useJudge: !args.includes("--no-judge"),
+  };
+}
+
+async function runCase(c: EvalCase, useJudge: boolean): Promise<Outcome[]> {
+  _resetRateLimit(); // the handlers rate-limit per client; an eval run is one client
+  try {
+    if (c.kind === "chat") return await runChatCase(c, useJudge);
+    return await (c.kind === "parse" ? runParseCase(c) : runGrievanceCase(c));
+  } catch (e) {
+    const detail = e instanceof LlmUnavailableError ? e.message : String((e as Error).message);
+    return [{ check: { kind: "judge", rubric: "ran without error" }, pass: false, detail }];
+  }
+}
+
+type Report = { id: string; area: string; pass: boolean; failures: Outcome[] }[];
+
+function printSummary(report: Report): number {
+  console.log("\nBy area:");
+  for (const a of [...new Set(report.map((r) => r.area))]) {
+    const rs = report.filter((r) => r.area === a);
+    console.log(`  ${a.padEnd(10)} ${rs.filter((r) => r.pass).length}/${rs.length}`);
+  }
+  const failed = report.filter((r) => !r.pass).length;
+  console.log(`\n${report.length - failed}/${report.length} cases passed.`);
+  return failed;
 }
 
 async function main() {
@@ -135,15 +208,7 @@ async function main() {
     console.error("GEMINI_API_KEY is not set. Add it to .env.local and run: npm run eval");
     process.exit(2);
   }
-  const args = process.argv.slice(2);
-  const flag = (name: string) => {
-    const i = args.indexOf(name);
-    return i >= 0 ? args[i + 1] : undefined;
-  };
-  const only = flag("--only");
-  const area = flag("--area");
-  const delay = Number(flag("--delay") ?? 4000);
-  const useJudge = !args.includes("--no-judge");
+  const { only, area, delay, useJudge } = readOptions(process.argv.slice(2));
 
   const cases: EvalCase[] = CASES.filter((c) => (!only || c.id === only) && (!area || c.area === area));
   if (cases.length === 0) {
@@ -152,32 +217,21 @@ async function main() {
   }
   console.log(`Running ${cases.length} cases${useJudge ? "" : " (judge off)"}, ${delay}ms apart.\n`);
 
-  const report: { id: string; area: string; pass: boolean; failures: Outcome[] }[] = [];
-
+  const report: Report = [];
   for (const c of cases) {
-    _resetRateLimit(); // the handlers rate-limit per client; an eval run is one client
-    let outcomes: Outcome[];
-    try {
-      outcomes =
-        c.kind === "chat" ? await runChatCase(c, useJudge) : c.kind === "parse" ? await runParseCase(c) : await runGrievanceCase(c);
-    } catch (e) {
-      outcomes = [{ check: { kind: "judge", rubric: "ran without error" }, pass: false, detail: e instanceof LlmUnavailableError ? e.message : String((e as Error).message) }];
-    }
-    const failures = outcomes.filter((o) => !o.pass);
+    const failures = (await runCase(c, useJudge)).filter((o) => !o.pass);
     report.push({ id: c.id, area: c.area, pass: failures.length === 0, failures });
     console.log(`${failures.length === 0 ? "PASS" : "FAIL"}  ${c.id}  (${c.area})`);
-    for (const f of failures) console.log(`        - ${f.check.kind === "judge" ? f.check.rubric.slice(0, 90) : f.check.kind}: ${f.detail}`);
+    for (const f of failures)
+      console.log(`        - ${f.check.kind === "judge" ? f.check.rubric.slice(0, 90) : f.check.kind}: ${f.detail}`);
     await sleep(delay);
   }
 
-  console.log("\nBy area:");
-  for (const a of [...new Set(report.map((r) => r.area))]) {
-    const rs = report.filter((r) => r.area === a);
-    console.log(`  ${a.padEnd(10)} ${rs.filter((r) => r.pass).length}/${rs.length}`);
-  }
-  const failed = report.filter((r) => !r.pass).length;
-  console.log(`\n${report.length - failed}/${report.length} cases passed.`);
-  await writeFile(path.join(import.meta.dirname, "last-run.json"), JSON.stringify({ at: new Date().toISOString(), report }, null, 2) + "\n");
+  const failed = printSummary(report);
+  await writeFile(
+    path.join(import.meta.dirname, "last-run.json"),
+    JSON.stringify({ at: new Date().toISOString(), report }, null, 2) + "\n",
+  );
   process.exit(failed ? 1 : 0);
 }
 

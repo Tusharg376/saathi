@@ -35,10 +35,12 @@ export function RightsBrowser() {
   }, [query, filter]);
 
   // Any change to the search starts the list from the top again.
-  const change = <T,>(set: (v: T) => void) => (v: T) => {
-    set(v);
-    setShown(PAGE);
-  };
+  const change =
+    <T,>(set: (v: T) => void) =>
+    (v: T) => {
+      set(v);
+      setShown(PAGE);
+    };
 
   return (
     <div className="space-y-4 px-4 py-5">

@@ -37,8 +37,13 @@ async function main() {
   const models = await listGenerativeModels();
   const gemini = models.filter((m) => m.startsWith("gemini"));
   console.log(gemini.join("\n") || "(none listed)");
-  for (const [label, id] of [["primary", MODELS.primary], ["fast", MODELS.fast]] as const) {
-    console.log(`${label} ${id}: ${models.includes(id) ? "OK" : "NOT FOUND in list, set GEMINI_MODEL_" + label.toUpperCase()}`);
+  for (const [label, id] of [
+    ["primary", MODELS.primary],
+    ["fast", MODELS.fast],
+  ] as const) {
+    console.log(
+      `${label} ${id}: ${models.includes(id) ? "OK" : "NOT FOUND in list, set GEMINI_MODEL_" + label.toUpperCase()}`,
+    );
   }
 
   step("2. one-shot text (fast)");

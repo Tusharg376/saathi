@@ -21,9 +21,7 @@ export function startingPoint(prefill?: ComplaintPrefill) {
 }
 
 export type FlowResult =
-  | { kind: "error"; key: MessageKey }
-  | { kind: "questions"; questions: string[] }
-  | { kind: "view"; view: LetterView };
+  { kind: "error"; key: MessageKey } | { kind: "questions"; questions: string[] } | { kind: "view"; view: LetterView };
 
 export interface FlowInput {
   issue: Issue;

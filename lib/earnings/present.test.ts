@@ -51,14 +51,24 @@ describe("parseAmount", () => {
 
 describe("flagMessage", () => {
   const flags: Anomaly[] = [
-    { code: "high_deduction", severity: "warn", date: "2026-10-17", platform: "Swiggy", deductionsInr: 400, ratePct: 40 },
+    {
+      code: "high_deduction",
+      severity: "warn",
+      date: "2026-10-17",
+      platform: "Swiggy",
+      deductionsInr: 400,
+      ratePct: 40,
+    },
     { code: "hourly_drop", severity: "warn", dropPct: 43, currentPerHour: 65, previousPerHour: 115 },
     { code: "fuel_heavy", severity: "info", sharePct: 45 },
     { code: "long_day", severity: "warn", date: "2026-10-16", hours: 13 },
     { code: "no_rest", severity: "warn", avgHours: 10.5 },
   ];
 
-  for (const [lang, locale] of [["en", "en-IN"], ["hi", "hi-IN"]] as const) {
+  for (const [lang, locale] of [
+    ["en", "en-IN"],
+    ["hi", "hi-IN"],
+  ] as const) {
     it(`fills every placeholder in ${lang}`, () => {
       const t = (k: MessageKey, v?: Record<string, string | number>) => translate(lang, k, v);
       for (const f of flags) {
@@ -115,7 +125,10 @@ describe("buildDashboard", () => {
   });
 
   it("limits platform totals to the last 30 days", () => {
-    const d = buildDashboard([e(1, { platform: "Zomato", grossInr: 5000 }), e(45, { platform: "Old", grossInr: 9999 })], TODAY);
+    const d = buildDashboard(
+      [e(1, { platform: "Zomato", grossInr: 5000 }), e(45, { platform: "Old", grossInr: 9999 })],
+      TODAY,
+    );
     expect(d.platforms.map((p) => p.platform)).toEqual(["Zomato"]);
   });
 

@@ -23,7 +23,10 @@ export function EmergencyBanner({ severity, helplines }: Props) {
 
   if (severity === "possible") {
     return (
-      <p role="status" className="flex items-center gap-2 rounded-xl border-2 border-dashed border-signal bg-paper px-3 py-2 text-sm font-bold text-signal">
+      <p
+        role="status"
+        className="flex items-center gap-2 rounded-xl border-2 border-dashed border-signal bg-paper px-3 py-2 text-sm font-bold text-signal"
+      >
         <Siren size={16} aria-hidden />
         <a href="tel:112" className="underline">
           {t("emergency.possible")}
@@ -33,7 +36,11 @@ export function EmergencyBanner({ severity, helplines }: Props) {
   }
 
   return (
-    <section role="alert" aria-label={t("emergency.urgent")} className="rounded-2xl border-4 border-signal bg-paper p-3">
+    <section
+      role="alert"
+      aria-label={t("emergency.urgent")}
+      className="rounded-2xl border-4 border-signal bg-paper p-3"
+    >
       <h2 className="mb-2 flex items-center gap-2 text-lg font-extrabold text-signal">
         <Siren size={22} aria-hidden />
         {t("emergency.urgent")}

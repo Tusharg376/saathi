@@ -114,7 +114,9 @@ async function main() {
   for (const code of targets) {
     await translateLanguage(code, { only, force: args.includes("--force"), dry: args.includes("--dry") });
   }
-  console.log("\nDone. A native speaker with domain knowledge must review lib/kb/data/i18n/*.json before real-world use.");
+  console.log(
+    "\nDone. A native speaker with domain knowledge must review lib/kb/data/i18n/*.json before real-world use.",
+  );
 }
 
 main().catch((err) => {

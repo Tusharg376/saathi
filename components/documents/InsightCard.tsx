@@ -41,7 +41,19 @@ function List({ title, items, ordered }: { title: string; items: string[]; order
 }
 
 /** A warning box with the helpline plate that matches it. */
-function Warning({ tone, text, number, label, Icon }: { tone: "scam" | "help"; text: string; number: string; label: string; Icon: typeof ShieldAlert }) {
+function Warning({
+  tone,
+  text,
+  number,
+  label,
+  Icon,
+}: {
+  tone: "scam" | "help";
+  text: string;
+  number: string;
+  label: string;
+  Icon: typeof ShieldAlert;
+}) {
   const border = tone === "scam" ? "border-4 border-signal" : "border-2 border-dashed border-tarmac";
   return (
     <div role={tone === "scam" ? "alert" : "note"} className={`space-y-2 rounded-xl p-3 ${border}`}>
@@ -59,7 +71,13 @@ function Warning({ tone, text, number, label, Icon }: { tone: "scam" | "help"; t
 
 /** The spoken version: what it is, what it wants, the deadline, and the steps. */
 const spokenSummary = (i: NormalizedInsight, deadlineLabel: string): string =>
-  [i.title, i.what_is_this, i.kind !== "unreadable" && i.what_it_wants, i.deadline && `${deadlineLabel}: ${i.deadline}`, ...i.next_steps]
+  [
+    i.title,
+    i.what_is_this,
+    i.kind !== "unreadable" && i.what_it_wants,
+    i.deadline && `${deadlineLabel}: ${i.deadline}`,
+    ...i.next_steps,
+  ]
     .filter(Boolean)
     .join(". ");
 
@@ -74,13 +92,19 @@ export function InsightCard({ insight: i }: { insight: NormalizedInsight }) {
     <div className="space-y-4">
       <article className="space-y-4 rounded-2xl border-2 border-tarmac bg-paper p-4">
         <div>
-          <span className="inline-block rounded-full border-2 border-tarmac px-2.5 py-0.5 text-sm font-bold">{t(KIND_LABEL[i.kind])}</span>
+          <span className="inline-block rounded-full border-2 border-tarmac px-2.5 py-0.5 text-sm font-bold">
+            {t(KIND_LABEL[i.kind])}
+          </span>
           <h2 className="mt-2 text-xl font-extrabold leading-snug">{i.title}</h2>
           <SpeakButton className="mt-2" text={spokenSummary(i, t("doc.sec.deadline"))} />
         </div>
 
-        {i.scam_signs && <Warning tone="scam" text={t("doc.scam")} number="1930" label={t("sos.plate.cyber")} Icon={ShieldAlert} />}
-        {i.needs_human_help && <Warning tone="help" text={t("doc.help")} number="15100" label={t("helpline.legal")} Icon={AlertTriangle} />}
+        {i.scam_signs && (
+          <Warning tone="scam" text={t("doc.scam")} number="1930" label={t("sos.plate.cyber")} Icon={ShieldAlert} />
+        )}
+        {i.needs_human_help && (
+          <Warning tone="help" text={t("doc.help")} number="15100" label={t("helpline.legal")} Icon={AlertTriangle} />
+        )}
         {i.confidence === "low" && !unreadable && <p className="text-sm font-bold text-ink-soft">{t("doc.low")}</p>}
 
         <section>

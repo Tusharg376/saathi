@@ -90,11 +90,29 @@ describe("generateText", () => {
   it("returns the model's text and sends system instruction, temperature and the abort signal", async () => {
     sdk.generateContent.mockResolvedValue({ text: "namaste" });
     const ac = new AbortController();
-    const out = await generateText([userText("hello")], { system: "Be kind.", temperature: 0.2, maxOutputTokens: 50, signal: ac.signal });
+    const out = await generateText([userText("hello")], {
+      model: "gemini-2.5-flash", // an older model still takes a custom temperature
+      system: "Be kind.",
+      temperature: 0.2,
+      maxOutputTokens: 50,
+      signal: ac.signal,
+    });
     expect(out).toBe("namaste");
     const call = sdk.generateContent.mock.calls[0][0];
-    expect(call.config).toMatchObject({ systemInstruction: "Be kind.", temperature: 0.2, maxOutputTokens: 50, abortSignal: ac.signal });
+    expect(call.config).toMatchObject({
+      systemInstruction: "Be kind.",
+      temperature: 0.2,
+      maxOutputTokens: 50,
+      abortSignal: ac.signal,
+    });
     expect(call.contents).toEqual([{ role: "user", parts: [{ text: "hello" }] }]);
+  });
+
+  it("leaves sampling at the default for Gemini 3 models, as Google advises, instead of sending a low temperature", async () => {
+    sdk.generateContent.mockResolvedValue({ text: "x" });
+    await generateText("a", { temperature: 0 });
+    await generateText("a", { model: "gemini-3.5-flash-lite", temperature: 0.3 });
+    for (const [call] of sdk.generateContent.mock.calls) expect(call.config).not.toHaveProperty("temperature");
   });
 
   it("uses the primary model by default, the fast tier on request, and honours env overrides", async () => {
@@ -300,15 +318,28 @@ describe("runToolLoop", () => {
       .mockResolvedValueOnce(stream(partsChunk({ text: "sorry" })));
     const events = await collect(runToolLoop([userText("x")], { tools: [strict] }));
     expect(run).not.toHaveBeenCalled();
-    expect((events.find((e) => e.type === "tool_result") as { result: { error: string } }).result.error).toMatch(/Invalid arguments/);
+    expect((events.find((e) => e.type === "tool_result") as { result: { error: string } }).result.error).toMatch(
+      /Invalid arguments/,
+    );
   });
 
   it("reports an unknown tool and a throwing tool to the model instead of crashing", async () => {
-    const boom = defineTool({ name: "boom", description: "d", args: z.object({}), run: () => { throw new Error("kaboom"); } });
+    const boom = defineTool({
+      name: "boom",
+      description: "d",
+      args: z.object({}),
+      run: () => {
+        throw new Error("kaboom");
+      },
+    });
     sdk.generateContentStream
-      .mockResolvedValueOnce(stream(partsChunk({ functionCall: { name: "ghost", args: {} } }, { functionCall: { name: "boom", args: {} } })))
+      .mockResolvedValueOnce(
+        stream(partsChunk({ functionCall: { name: "ghost", args: {} } }, { functionCall: { name: "boom", args: {} } })),
+      )
       .mockResolvedValueOnce(stream(partsChunk({ text: "done" })));
-    const results = (await collect(runToolLoop([userText("x")], { tools: [boom] }))).filter((e) => e.type === "tool_result") as {
+    const results = (await collect(runToolLoop([userText("x")], { tools: [boom] }))).filter(
+      (e) => e.type === "tool_result",
+    ) as {
       result: { error: string };
     }[];
     expect(results[0].result.error).toMatch(/Unknown tool: ghost/);
@@ -316,7 +347,13 @@ describe("runToolLoop", () => {
   });
 
   it("forwards a client-action tool to the caller as a ui_action", async () => {
-    const propose = defineTool({ name: "propose", description: "d", args: z.object({ x: z.number() }), run: () => ({ shown: true }), clientAction: true });
+    const propose = defineTool({
+      name: "propose",
+      description: "d",
+      args: z.object({ x: z.number() }),
+      run: () => ({ shown: true }),
+      clientAction: true,
+    });
     sdk.generateContentStream
       .mockResolvedValueOnce(stream(partsChunk({ functionCall: { name: "propose", args: { x: 7 } } })))
       .mockResolvedValueOnce(stream(partsChunk({ text: "ok" })));
@@ -334,7 +371,9 @@ describe("runToolLoop", () => {
   });
 
   it("does not show the model's private thoughts as text", async () => {
-    sdk.generateContentStream.mockResolvedValue(stream(partsChunk({ text: "secret reasoning", thought: true }, { text: "Answer." })));
+    sdk.generateContentStream.mockResolvedValue(
+      stream(partsChunk({ text: "secret reasoning", thought: true }, { text: "Answer." })),
+    );
     expect(await collect(runToolLoop([userText("x")], opts()))).toEqual([{ type: "text", text: "Answer." }]);
   });
 

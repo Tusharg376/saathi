@@ -1,5 +1,6 @@
 /** How this week's net compares with the week before, as a plain category the UI can word and colour. */
-export type Trend = { kind: "unknown" } | { kind: "same" } | { kind: "up"; pct: number } | { kind: "down"; pct: number };
+export type Trend =
+  { kind: "unknown" } | { kind: "same" } | { kind: "up"; pct: number } | { kind: "down"; pct: number };
 
 /** Changes under one percent read as "about the same" rather than a misleading +0%. */
 export function describeTrend(changePct: number | null): Trend {

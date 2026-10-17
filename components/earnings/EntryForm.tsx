@@ -8,9 +8,20 @@ import { validateDraft, type Draft, type DraftError, type DraftField } from "@/l
 import { inr } from "@/lib/earnings/format";
 import { netOf } from "@/lib/earnings/math";
 
-export const PLATFORMS = ["Swiggy", "Zomato", "Zepto", "Blinkit", "Uber", "Ola", "Rapido", "Porter", "Urban Company", "Daily wage"];
+const PLATFORMS = [
+  "Swiggy",
+  "Zomato",
+  "Zepto",
+  "Blinkit",
+  "Uber",
+  "Ola",
+  "Rapido",
+  "Porter",
+  "Urban Company",
+  "Daily wage",
+];
 
-export const ERROR_KEY: Record<DraftError, MessageKey> = {
+const ERROR_KEY: Record<DraftError, MessageKey> = {
   number: "earn.err.number",
   date: "earn.err.date",
   future: "earn.err.future",
@@ -77,10 +88,24 @@ export function EntryForm({
       {/* One column on phones: a date needs the full width to show the year. */}
       <div className="grid grid-cols-1 gap-3 min-[460px]:grid-cols-2">
         <Field label={t("earn.f.date")} error={errors.date}>
-          <input type="date" className={input} max={today} value={value.date} onChange={set("date")} aria-invalid={Boolean(errors.date)} />
+          <input
+            type="date"
+            className={input}
+            max={today}
+            value={value.date}
+            onChange={set("date")}
+            aria-invalid={Boolean(errors.date)}
+          />
         </Field>
         <Field label={t("earn.f.platform")}>
-          <input className={input} list="saathi-platforms" autoComplete="off" value={value.platform} onChange={set("platform")} maxLength={40} />
+          <input
+            className={input}
+            list="saathi-platforms"
+            autoComplete="off"
+            value={value.platform}
+            onChange={set("platform")}
+            maxLength={40}
+          />
         </Field>
       </div>
 
@@ -107,13 +132,16 @@ export function EntryForm({
           {net !== null && t("earn.net_preview", { net: inr(net) })}
         </p>
         {onRemove && (
-          <button type="button" onClick={onRemove} className="flex min-h-11 items-center gap-1.5 rounded-full border-2 border-tarmac bg-paper px-3 text-sm font-bold active:bg-line">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="flex min-h-11 items-center gap-1.5 rounded-full border-2 border-tarmac bg-paper px-3 text-sm font-bold active:bg-line"
+          >
             <Trash2 size={16} aria-hidden />
             {t("earn.remove")}
           </button>
         )}
       </div>
-
     </fieldset>
   );
 }

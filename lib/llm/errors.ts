@@ -1,6 +1,7 @@
 /**
- * Errors from the model layer, and what to do about them. Messages are written for the
- * worker's screen: they never include provider text, which can hold internal detail.
+ * Errors from the model layer, and what to do about them. Any error that carries an HTTP status
+ * gets a fixed message, so the provider's own text (which can hold internal detail) is never passed
+ * on. Only an error with no status at all, such as a dropped connection, keeps the SDK's wording.
  */
 
 export class LlmUnavailableError extends Error {
@@ -22,7 +23,7 @@ export class LlmError extends Error {
 function messageFor(status: number | undefined, fallback?: string): string {
   if (status === 429) return "Rate limit reached. Please try again in a minute.";
   if (status !== undefined && status >= 500) return "The AI service is busy. Please try again.";
-  if (status === 400 || status === 403) {
+  if (status !== undefined && status >= 400) {
     return `The AI service rejected the request (${status}). Check the API key and model name.`;
   }
   return fallback || "Unexpected AI error";

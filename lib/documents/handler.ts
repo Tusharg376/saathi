@@ -1,10 +1,8 @@
-import { LlmError, LlmUnavailableError, generateJSON, hasApiKey, inlineData, type Part } from "../llm/gemini";
-import { LANGUAGES } from "../i18n/messages";
+import { generateJSON, hasApiKey, inlineData, type Part } from "../llm/gemini";
 import { json, readBody, tooMany } from "../server/http";
+import { languageName, llmFailure } from "../server/llm-response";
 import { redactPII } from "../safety/pii";
 import { DocumentInsight, DocumentRequest, buildDocumentPrompt, normalizeInsight } from "./insight";
-
-const langName = (code: string) => LANGUAGES.find((l) => l.code === code)?.english ?? "Hindi";
 
 /** Photo of a notice, challan, message or form in; plain-language explanation out. Nothing is stored. */
 export async function handleDocument(request: Request): Promise<Response> {
@@ -25,14 +23,11 @@ export async function handleDocument(request: Request): Promise<Response> {
   try {
     const raw = await generateJSON([{ role: "user", parts }], DocumentInsight, {
       model: "primary",
-      system: buildDocumentPrompt(langName(lang)),
+      system: buildDocumentPrompt(languageName(lang)),
       temperature: 0.2,
     });
     return json({ insight: normalizeInsight(raw) });
   } catch (err) {
-    if (err instanceof LlmUnavailableError) return json({ error: "no_key" }, 503);
-    if (err instanceof LlmError && err.status === 429) return json({ error: "rate_limited" }, 429);
-    console.error("document handler failure:", redactPII(String((err as Error)?.message ?? err)).text);
-    return json({ error: "llm_error" }, 502);
+    return llmFailure("document handler", err);
   }
 }

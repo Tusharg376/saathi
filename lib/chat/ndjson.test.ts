@@ -50,7 +50,8 @@ describe("NdjsonParser", () => {
     const decoder = new TextDecoder();
     const p = new NdjsonParser();
     const out: unknown[] = [];
-    for (const b of new TextEncoder().encode(line)) out.push(...p.push(decoder.decode(new Uint8Array([b]), { stream: true })));
+    for (const b of new TextEncoder().encode(line))
+      out.push(...p.push(decoder.decode(new Uint8Array([b]), { stream: true })));
     expect(out).toEqual([{ type: "text", text: "தமிழ் ಕನ್ನಡ 😀" }]);
   });
 });

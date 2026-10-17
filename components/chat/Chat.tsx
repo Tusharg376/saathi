@@ -26,11 +26,14 @@ export function Chat() {
     void import("./MessageList");
   }, []);
 
+  // Follow the conversation as it grows. Not on the welcome screen: scrolling there on arrival
+  // pushed the greeting out of view before the worker had read a word.
   useEffect(() => {
-    end.current?.scrollIntoView({ block: "end" });
+    if (chat.messages.length > 0) end.current?.scrollIntoView({ block: "end" });
   }, [chat.messages]);
 
   const ask = (text: string) => {
+    if (chat.busy) return; // an answer is still coming: keep what was typed instead of throwing it away
     void chat.send(text);
     setInput("");
   };
@@ -42,6 +45,8 @@ export function Chat() {
           <Welcome onAsk={ask} />
         ) : (
           <>
+            {/* The welcome heading is gone once the conversation starts; the page still needs its h1. */}
+            <h1 className="sr-only">{t("nav.chat")}</h1>
             <div className="flex justify-end">
               <button
                 type="button"

@@ -13,7 +13,7 @@ export const ISSUES = [
 ] as const;
 export type Issue = (typeof ISSUES)[number];
 
-export const issueKbId = (i: Issue) => `grievance.${i}`;
+const issueKbId = (i: Issue) => `grievance.${i}`;
 export const issueEntry = (i: Issue): KbEntry | undefined => getEntry(issueKbId(i));
 
 export interface Details {
@@ -75,14 +75,14 @@ export function repairRedactionTokens(text: string): string {
 const ASK: Record<Issue, string> = {
   deactivation:
     "Please tell me in writing the exact reason my account was deactivated, give me a fair chance to appeal, and restore my account if the action was taken in error.",
-  short_payment: "Please pay the amount that is due to me and send me a written breakdown that explains the difference.",
+  short_payment:
+    "Please pay the amount that is due to me and send me a written breakdown that explains the difference.",
   penalty:
     "Please share the rule and the proof used to apply this penalty, review it, and refund the amount if it was applied wrongly.",
   incentive: "Please pay the incentive I earned, or explain in writing why it does not apply to me.",
   accident_claim:
     "Please tell me in writing how to claim the accident cover that applies to me and by what date, and process my claim.",
-  harassment:
-    "Please look into this incident, take steps to keep me safe, and tell me the outcome in writing.",
+  harassment: "Please look into this incident, take steps to keep me safe, and tell me the outcome in writing.",
   wage_theft: "Please pay the wages that are due to me for the days I worked.",
   challan: "Please review this challan, because I believe it was issued in error, and cancel it if that is the case.",
 };

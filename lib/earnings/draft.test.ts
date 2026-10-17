@@ -2,14 +2,27 @@ import { describe, expect, it } from "vitest";
 import { draftFromEntry, emptyDraft, validateDraft, validateDrafts, type Draft } from "./draft";
 
 const TODAY = "2026-10-17";
-const draft = (over: Partial<Draft> = {}): Draft => ({ ...emptyDraft(TODAY), platform: "Swiggy", gross: "1850", ...over });
+const draft = (over: Partial<Draft> = {}): Draft => ({
+  ...emptyDraft(TODAY),
+  platform: "Swiggy",
+  gross: "1850",
+  ...over,
+});
 
 describe("validateDraft", () => {
   it("turns a typed form into a clean entry; blank means zero", () => {
     const r = validateDraft(draft({ fuel: "400", orders: "12" }), TODAY);
     expect(r).toEqual({
       ok: true,
-      entry: { date: TODAY, platform: "Swiggy", grossInr: 1850, deductionsInr: 0, fuelInr: 400, otherCostInr: 0, orders: 12 },
+      entry: {
+        date: TODAY,
+        platform: "Swiggy",
+        grossInr: 1850,
+        deductionsInr: 0,
+        fuelInr: 400,
+        otherCostInr: 0,
+        orders: 12,
+      },
     });
   });
 
@@ -56,8 +69,12 @@ describe("validateDraft", () => {
   });
 
   it("defaults and bounds the platform name", () => {
-    expect((validateDraft(draft({ platform: "   " }), TODAY) as { entry: { platform: string } }).entry.platform).toBe("Other");
-    expect((validateDraft(draft({ platform: "x".repeat(99) }), TODAY) as { entry: { platform: string } }).entry.platform).toHaveLength(40);
+    expect((validateDraft(draft({ platform: "   " }), TODAY) as { entry: { platform: string } }).entry.platform).toBe(
+      "Other",
+    );
+    expect(
+      (validateDraft(draft({ platform: "x".repeat(99) }), TODAY) as { entry: { platform: string } }).entry.platform,
+    ).toHaveLength(40);
   });
 
   it("keeps decimals in hours only to one place", () => {
@@ -75,13 +92,30 @@ describe("validateDraft", () => {
 
 describe("draft round trip", () => {
   it("an entry survives entry -> draft -> entry", () => {
-    const entry = { date: TODAY, platform: "Zomato", grossInr: 900, deductionsInr: 50, fuelInr: 200, otherCostInr: 0, orders: 7, hours: 6.5, km: 40 };
+    const entry = {
+      date: TODAY,
+      platform: "Zomato",
+      grossInr: 900,
+      deductionsInr: 50,
+      fuelInr: 200,
+      otherCostInr: 0,
+      orders: 7,
+      hours: 6.5,
+      km: 40,
+    };
     const r = validateDraft(draftFromEntry(entry), TODAY);
     expect(r).toEqual({ ok: true, entry });
   });
 
   it("renders zeros as blanks so the form is not cluttered", () => {
-    const d = draftFromEntry({ date: TODAY, platform: "X", grossInr: 100, deductionsInr: 0, fuelInr: 0, otherCostInr: 0 });
+    const d = draftFromEntry({
+      date: TODAY,
+      platform: "X",
+      grossInr: 100,
+      deductionsInr: 0,
+      fuelInr: 0,
+      otherCostInr: 0,
+    });
     expect(d).toMatchObject({ cuts: "", fuel: "", other: "", orders: "", hours: "", km: "" });
   });
 

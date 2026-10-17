@@ -1,6 +1,14 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { _openForTest, addEntries, clearAllEarnings, deleteEntry, listEntries, sortNewestFirst, watchEntries } from "./index";
+import {
+  _openForTest,
+  addEntries,
+  clearAllEarnings,
+  deleteEntry,
+  listEntries,
+  sortNewestFirst,
+  watchEntries,
+} from "./index";
 import type { EarningEntry, NewEntry } from "../earnings/math";
 
 const e = (date: string, over: Partial<NewEntry> = {}): NewEntry => ({
@@ -110,7 +118,10 @@ describe("watchEntries", () => {
 
 describe("sortNewestFirst", () => {
   it("does not mutate its input", () => {
-    const rows = [{ id: 1, date: "2026-10-01" }, { id: 2, date: "2026-10-02" }] as EarningEntry[];
+    const rows = [
+      { id: 1, date: "2026-10-01" },
+      { id: 2, date: "2026-10-02" },
+    ] as EarningEntry[];
     const copy = [...rows];
     sortNewestFirst(rows);
     expect(rows).toEqual(copy);

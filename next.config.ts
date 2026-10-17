@@ -1,5 +1,8 @@
 import path from "node:path";
 import type { NextConfig } from "next";
+import { contentSecurityPolicy } from "./lib/server/csp";
+
+const production = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -14,6 +17,14 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // Camera (document photos), microphone (voice) and location (SOS) are used by this app only.
           { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(self)" },
+          // Production only: React's development tools need eval, and HTTPS-only rules are meaningless on localhost.
+          ...(production
+            ? [
+                { key: "Content-Security-Policy", value: contentSecurityPolicy() },
+                { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+                { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+              ]
+            : []),
         ],
       },
       {

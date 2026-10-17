@@ -8,6 +8,7 @@ import type { LangCode, MessageKey } from "@/lib/i18n/messages";
 import { ISSUES, type Issue } from "@/lib/grievance/letter";
 import type { KbEntry, KbStatus } from "@/lib/kb";
 import { localizeEntry } from "@/lib/kb/localize";
+import { isOfficialHost } from "@/lib/safety/links";
 import { useHandoffNav } from "@/lib/useHandoffNav";
 
 const STATUS: Record<KbStatus, { key: MessageKey; Icon: typeof Hourglass; cls: string }> = {
@@ -35,12 +36,21 @@ export function StatusBadge({ status }: { status: KbStatus }) {
 const contentLang = (ui: LangCode, shown: unknown, english: unknown): "en" | undefined =>
   ui !== "en" && shown === english ? "en" : undefined;
 
-function Section({ title, items, ordered, lang }: { title: string; items?: string[]; ordered?: boolean; lang?: "en" }) {
+interface SectionProps {
+  title: string;
+  items?: string[];
+  ordered?: boolean;
+  lang?: "en";
+  /** One level below the card's own title, so headings never skip a level. */
+  Heading: "h3" | "h4";
+}
+
+function Section({ title, items, ordered, lang, Heading }: SectionProps) {
   if (!items?.length) return null;
   const List = ordered ? "ol" : "ul";
   return (
     <section className="mt-3">
-      <h4 className="font-extrabold">{title}</h4>
+      <Heading className="font-extrabold">{title}</Heading>
       <List lang={lang} className={`mt-1 space-y-1 pl-5 ${ordered ? "list-decimal" : "list-disc"} marker:text-tarmac`}>
         {items.map((x) => (
           <li key={x}>{x}</li>
@@ -61,11 +71,16 @@ function CardActions({ entry }: { entry: KbEntry }) {
   const { t } = useI18n();
   const goWith = useHandoffNav();
   const issue = issueOf(entry);
-  const btn = "flex min-h-11 items-center gap-1.5 rounded-full border-2 border-tarmac bg-paper px-3 text-sm font-bold active:bg-line";
+  const btn =
+    "flex min-h-11 items-center gap-1.5 rounded-full border-2 border-tarmac bg-paper px-3 text-sm font-bold active:bg-line";
 
   return (
     <div className="mt-3 flex flex-wrap gap-2">
-      <button type="button" className={btn} onClick={() => goWith("chat", { prompt: t("card.ask_prompt", { title: entry.title }) })}>
+      <button
+        type="button"
+        className={btn}
+        onClick={() => goWith("chat", { prompt: t("card.ask_prompt", { title: entry.title }) })}
+      >
         <MessageCircle size={16} aria-hidden />
         {t("card.ask")}
       </button>
@@ -93,6 +108,7 @@ export function KbCard({ entry: english, action, headingLevel = "h3", showAction
   // The worker's language when a validated translation exists; English otherwise.
   const entry = localizeEntry(english, lang);
   const Heading = headingLevel;
+  const SectionHeading = headingLevel === "h2" ? "h3" : "h4";
   const host = new URL(entry.source_url).host.replace(/^www\./, "");
   const l = (field: keyof KbEntry) => contentLang(lang, entry[field], english[field]);
 
@@ -117,11 +133,27 @@ export function KbCard({ entry: english, action, headingLevel = "h3", showAction
         <summary className="min-h-11 cursor-pointer select-none rounded-lg py-2 font-extrabold underline decoration-plate decoration-4 underline-offset-4">
           {t("rights.eligibility")} · {t("rights.how")}
         </summary>
-        <Section title={t("rights.eligibility")} items={entry.eligibility} lang={l("eligibility")} />
-        <Section title={t("rights.benefits")} items={entry.benefits} lang={l("benefits")} />
-        <Section title={t("rights.how")} items={entry.how_to_apply} ordered lang={l("how_to_apply")} />
-        <Section title={t("rights.docs")} items={entry.documents_needed} lang={l("documents_needed")} />
-        <Section title={t("rights.steps")} items={entry.steps} ordered lang={l("steps")} />
+        <Section
+          title={t("rights.eligibility")}
+          items={entry.eligibility}
+          lang={l("eligibility")}
+          Heading={SectionHeading}
+        />
+        <Section title={t("rights.benefits")} items={entry.benefits} lang={l("benefits")} Heading={SectionHeading} />
+        <Section
+          title={t("rights.how")}
+          items={entry.how_to_apply}
+          ordered
+          lang={l("how_to_apply")}
+          Heading={SectionHeading}
+        />
+        <Section
+          title={t("rights.docs")}
+          items={entry.documents_needed}
+          lang={l("documents_needed")}
+          Heading={SectionHeading}
+        />
+        <Section title={t("rights.steps")} items={entry.steps} ordered lang={l("steps")} Heading={SectionHeading} />
       </details>
 
       {showActions && <CardActions entry={entry} />}
@@ -144,9 +176,9 @@ export function KbCard({ entry: english, action, headingLevel = "h3", showAction
           href={entry.source_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-8 items-center gap-1 font-bold text-strip underline"
+          className="inline-flex min-h-11 items-center gap-1 font-bold text-strip underline"
         >
-          {t("rights.source")}: {host}
+          {t(isOfficialHost(host) ? "rights.source" : "rights.source_other")}: {host}
           <ExternalLink size={14} aria-hidden />
         </a>
         <span>{entry.last_verified ? t("rights.checked", { date: entry.last_verified }) : t("rights.unchecked")}</span>

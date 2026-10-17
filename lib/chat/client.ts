@@ -34,7 +34,12 @@ export async function streamChat(
     body: JSON.stringify(req),
     signal,
   });
+  // Our own errors (rate limit, bad request) come back as NDJSON events and are shown as such. Anything else
+  // that is not OK (a 502 page from the host, say) has no events in it: fail so the screen falls back to
+  // on-device help, instead of showing an empty answer.
+  const ndjson = res.headers?.get("content-type")?.includes("ndjson") ?? false;
   if (!res.body) throw new Error("No response body");
+  if (!res.ok && !ndjson) throw new Error(`Chat unavailable (${res.status})`);
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder(); // stream mode keeps multi-byte characters intact across chunks

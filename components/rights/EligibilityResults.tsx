@@ -27,10 +27,15 @@ function ResultRow({ result }: { result: EligibilityResult }) {
         {result.status !== "live" && <StatusBadge status={result.status} />}
       </div>
       <p className="font-extrabold leading-snug">{result.title}</p>
-      {result.verdict === "maybe" && needs && <p className="text-sm text-ink-soft">{t("qual.need", { what: needs })}</p>}
+      {result.status !== "live" && result.status_note && <p className="text-sm text-ink-soft">{result.status_note}</p>}
+      {result.verdict === "maybe" && needs && (
+        <p className="text-sm text-ink-soft">{t("qual.need", { what: needs })}</p>
+      )}
       {entry && (
         <details className="rounded-xl border-2 border-line">
-          <summary className="min-h-11 cursor-pointer select-none px-3 py-2 font-bold">{t("rights.eligibility")}</summary>
+          <summary className="min-h-11 cursor-pointer select-none px-3 py-2 font-bold">
+            {t("rights.eligibility")}
+          </summary>
           <div className="p-2 pt-0">
             <KbCard entry={entry} showActions={false} />
           </div>

@@ -3,9 +3,7 @@ import type { InsightRequest, ParseRequest } from "./parse";
 import type { NewEntry } from "./math";
 
 export type ParseOutcome =
-  | { kind: "entries"; entries: NewEntry[] }
-  | { kind: "question"; question: string }
-  | { kind: FailureKind };
+  { kind: "entries"; entries: NewEntry[] } | { kind: "question"; question: string } | { kind: FailureKind };
 
 /** Text or a screenshot in; entries to confirm out. Nothing is saved by this call. */
 export async function requestParse(body: ParseRequest, fetchFn?: FetchLike): Promise<ParseOutcome> {

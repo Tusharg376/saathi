@@ -27,10 +27,10 @@
    * own script, so listing them all lets the browser pick per glyph (and, via
    * unicode-range, download only the scripts actually on screen).
    */
-  --stack-script: var(--f-deva), var(--f-tamil), var(--f-telugu), var(--f-kannada),
-    var(--f-bengali), var(--f-gujarati);
-  --stack-sans: var(--f-body), var(--stack-script), system-ui, sans-serif;
-  --stack-display: var(--f-display), var(--f-body), var(--stack-script), system-ui, sans-serif;
+  --stack-script: var(--f-tamil), var(--f-telugu), var(--f-kannada), var(--f-bengali), var(--f-gujarati);
+  --stack-sans: var(--f-rupee), var(--f-body), var(--stack-script), system-ui, sans-serif;
+  --stack-display: var(--f-display), var(--f-rupee), var(--f-body), var(--stack-script), system-ui, sans-serif;
+  --stack-brand: var(--f-brand), var(--f-body), system-ui, sans-serif;
 }
 
 @theme inline {
@@ -46,6 +46,7 @@
   --color-line: var(--line);
   --font-sans: var(--stack-sans);
   --font-display: var(--stack-display);
+  --font-brand: var(--stack-brand);
 }
 
 html {
@@ -120,9 +121,15 @@ body {
   font-variant-numeric: tabular-nums;
   padding: 0.18em 0.55em 0.14em;
 }
-.plate-sm .plate-num { font-size: 1.25rem; }
-.plate-md .plate-num { font-size: 2rem; }
-.plate-lg .plate-num { font-size: 3.25rem; }
+.plate-sm .plate-num {
+  font-size: 1.25rem;
+}
+.plate-md .plate-num {
+  font-size: 2rem;
+}
+.plate-lg .plate-num {
+  font-size: 3.25rem;
+}
 
 /* ---- Road-dash loader: the centre line of a road, moving ------------- */
 .road-dash {
@@ -133,10 +140,17 @@ body {
   animation: road 0.7s linear infinite;
 }
 @keyframes road {
-  to { background-position-x: -22px; }
+  to {
+    background-position-x: -22px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .road-dash { animation: none; }
-  * { scroll-behavior: auto !important; transition: none !important; }
+  .road-dash {
+    animation: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
 }

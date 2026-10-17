@@ -13,14 +13,33 @@ export function ContactFields({ contact, onChange }: { contact: Contact; onChang
     <fieldset className="space-y-3 rounded-2xl border-2 border-dashed border-tarmac p-3">
       <legend className="px-1 text-sm font-extrabold">{t("cmp.you")}</legend>
       <Field label={t("cmp.name")}>
-        <input className={inputClass} autoComplete="name" value={contact.name ?? ""} maxLength={80} onChange={set("name")} />
+        <input
+          className={inputClass}
+          autoComplete="name"
+          value={contact.name ?? ""}
+          maxLength={80}
+          onChange={set("name")}
+        />
       </Field>
       <div className="grid grid-cols-1 gap-3 min-[460px]:grid-cols-2">
         <Field label={t("cmp.phone")}>
-          <input className={inputClass} inputMode="tel" autoComplete="tel" value={contact.phone ?? ""} maxLength={20} onChange={set("phone")} />
+          <input
+            className={inputClass}
+            inputMode="tel"
+            autoComplete="tel"
+            value={contact.phone ?? ""}
+            maxLength={20}
+            onChange={set("phone")}
+          />
         </Field>
         <Field label={t("cmp.city")}>
-          <input className={inputClass} autoComplete="address-level2" value={contact.city ?? ""} maxLength={60} onChange={set("city")} />
+          <input
+            className={inputClass}
+            autoComplete="address-level2"
+            value={contact.city ?? ""}
+            maxLength={60}
+            onChange={set("city")}
+          />
         </Field>
       </div>
     </fieldset>

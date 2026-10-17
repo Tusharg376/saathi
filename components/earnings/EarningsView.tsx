@@ -34,20 +34,28 @@ export function EarningsView() {
     );
   }
 
+  // The title shows straight away; only the numbers wait for the phone's storage to answer.
+  const title = (
+    <div>
+      <h1 className="text-2xl font-extrabold">{t("earn.title")}</h1>
+      <p className="text-sm text-ink-soft">{t("earn.private")}</p>
+    </div>
+  );
+
   if (!state || !dashboard) {
     return (
-      <div className="px-4 py-10" role="status" aria-label={t("earn.title")}>
-        <div className="road-dash" />
+      <div className="space-y-5 px-4 py-5">
+        {title}
+        <div className="py-5" role="status" aria-label={t("earn.title")}>
+          <div className="road-dash" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-5 px-4 py-5">
-      <div>
-        <h1 className="text-2xl font-extrabold">{t("earn.title")}</h1>
-        <p className="text-sm text-ink-soft">{t("earn.private")}</p>
-      </div>
+      {title}
 
       {dashboard.hasData ? (
         <div className="flex justify-center py-1">

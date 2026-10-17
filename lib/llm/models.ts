@@ -21,3 +21,10 @@ export function resolveModel(tier: ModelTier | string | undefined): string {
   if (tier === "fast") return MODELS.fast;
   return tier; // explicit model id
 }
+
+/**
+ * Gemini 3 models are tuned for their default sampling, and Google advises against lowering the temperature
+ * (it can make them loop or reason worse). Later versions ignore a custom value altogether. So for these
+ * models the app asks for a value and the adapter simply does not send it.
+ */
+export const usesDefaultSampling = (model: string): boolean => /^gemini-(?:[3-9]|\d{2,})/.test(model);

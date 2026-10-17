@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { loadVoices, pickVoice, speak, stopSpeaking, supportsSpeechOutput } from "@/lib/voice/speech";
 
 /** True when this phone has a voice for the language. Resolved after mount; false until then. */
-export function useVoiceAvailable(lang: string): boolean {
+function useVoiceAvailable(lang: string): boolean {
   const [available, setAvailable] = useState(false);
   useEffect(() => {
     let alive = true;

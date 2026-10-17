@@ -1,10 +1,7 @@
-import { LlmError, LlmUnavailableError, generateJSON, hasApiKey, userText } from "../llm/gemini";
-import { LANGUAGES } from "../i18n/messages";
+import { generateJSON, hasApiKey, userText } from "../llm/gemini";
 import { json, readBody, tooMany } from "../server/http";
-import { redactPII } from "../safety/pii";
+import { languageName, llmFailure } from "../server/llm-response";
 import { GrievanceDraft, GrievanceRequest, buildGrievanceInput, buildGrievancePrompt, normalizeDraft } from "./draft";
-
-const langName = (code: string) => LANGUAGES.find((l) => l.code === code)?.english ?? "Hindi";
 
 /**
  * Describes a problem, returns either a few follow-up questions or a complete letter.
@@ -24,8 +21,8 @@ export async function handleGrievance(request: Request): Promise<Response> {
   const final = Boolean(req.final);
   const system = buildGrievancePrompt({
     issue: req.issue,
-    langName: langName(req.lang),
-    letterLangName: req.letterLang === "en" ? "English" : langName(req.lang),
+    langName: languageName(req.lang),
+    letterLangName: req.letterLang === "en" ? "English" : languageName(req.lang),
     final,
   });
 
@@ -39,9 +36,6 @@ export async function handleGrievance(request: Request): Promise<Response> {
     if (!draft) return json({ error: "llm_error" }, 502);
     return json({ draft });
   } catch (err) {
-    if (err instanceof LlmUnavailableError) return json({ error: "no_key" }, 503);
-    if (err instanceof LlmError && err.status === 429) return json({ error: "rate_limited" }, 429);
-    console.error("grievance handler failure:", redactPII(String((err as Error)?.message ?? err)).text);
-    return json({ error: "llm_error" }, 502);
+    return llmFailure("grievance handler", err);
   }
 }

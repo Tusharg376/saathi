@@ -43,11 +43,7 @@ beforeEach(() => {
 describe("runChat: happy path", () => {
   it("streams text then done", async () => {
     const evs = await collect(ask("hi"));
-    expect(evs).toEqual([
-      { type: "text", text: "Hello " },
-      { type: "text", text: "there" },
-      { type: "done" },
-    ]);
+    expect(evs).toEqual([{ type: "text", text: "Hello " }, { type: "text", text: "there" }, { type: "done" }]);
   });
 
   it("reports tool use and the KB entries the answer was grounded on", async () => {
@@ -182,6 +178,25 @@ describe("runChat: failures", () => {
     expect(evs.find((e) => e.type === "error")).toMatchObject({ code: "llm_error" });
   });
 
+  it("reports a missing key as no_key even when it only surfaces once the model is called", async () => {
+    const { LlmUnavailableError } = await import("../llm/gemini");
+    loop.impl = async function* () {
+      throw new LlmUnavailableError();
+    };
+    const evs = await collect(ask("hi"));
+    expect(evs.find((e) => e.type === "error")).toMatchObject({ code: "no_key" });
+    expect(evs.at(-1)).toEqual({ type: "done" });
+  });
+
+  it("refuses a conversation that has no question from the worker, without calling the model", async () => {
+    loop.impl = vi.fn(async function* () {
+      yield { type: "text", text: "should never run" };
+    });
+    const evs = await collect({ messages: [{ role: "assistant", text: "Hello" }], lang: "hi" });
+    expect(evs).toEqual([{ type: "error", code: "bad_request", message: "No user message" }]);
+    expect(loop.impl).not.toHaveBeenCalled();
+  });
+
   it("stays quiet when the client aborts", async () => {
     const ac = new AbortController();
     loop.impl = async function* () {
@@ -222,7 +237,14 @@ describe("buildSystemPrompt", () => {
 
   it("includes grounding, honesty and security rules", () => {
     const p = buildSystemPrompt({ lang: "hi" });
-    for (const needle of ["search_kb", "NEVER invent", "NOT certain", "DATA", "Plain text only", "Never repeat or ask for Aadhaar"]) {
+    for (const needle of [
+      "search_kb",
+      "NEVER invent",
+      "NOT certain",
+      "DATA",
+      "Plain text only",
+      "Never repeat or ask for Aadhaar",
+    ]) {
       expect(p, needle).toContain(needle);
     }
   });
@@ -254,7 +276,14 @@ describe("runChat: proposed next steps", () => {
       type: "action",
       action: {
         kind: "log_earning",
-        entry: { date: "2026-10-16", platform: "Swiggy", grossInr: 1850, deductionsInr: 0, fuelInr: 400, otherCostInr: 0 },
+        entry: {
+          date: "2026-10-16",
+          platform: "Swiggy",
+          grossInr: 1850,
+          deductionsInr: 0,
+          fuelInr: 400,
+          otherCostInr: 0,
+        },
       },
     });
   });
@@ -266,11 +295,20 @@ describe("runChat: proposed next steps", () => {
   });
 
   it("proposes a complaint with the worker's own summary", async () => {
-    act("propose_complaint", { issue: "deactivation", summary: "My Uber account was blocked on 10 October.", party: "Uber" });
+    act("propose_complaint", {
+      issue: "deactivation",
+      summary: "My Uber account was blocked on 10 October.",
+      party: "Uber",
+    });
     const evs = await collect(ask("mera Uber ID block ho gaya"));
     expect(evs.find((e) => e.type === "action")).toEqual({
       type: "action",
-      action: { kind: "start_complaint", issue: "deactivation", summary: "My Uber account was blocked on 10 October.", party: "Uber" },
+      action: {
+        kind: "start_complaint",
+        issue: "deactivation",
+        summary: "My Uber account was blocked on 10 October.",
+        party: "Uber",
+      },
     });
   });
 
@@ -281,7 +319,11 @@ describe("runChat: proposed next steps", () => {
 
   it("does not treat a model that only proposes (no prose) as a failure", async () => {
     loop.impl = async function* () {
-      yield { type: "ui_action", name: "propose_complaint", args: { issue: "penalty", summary: "They cut Rs 400 wrongly last week." } };
+      yield {
+        type: "ui_action",
+        name: "propose_complaint",
+        args: { issue: "penalty", summary: "They cut Rs 400 wrongly last week." },
+      };
     };
     const evs = await collect(ask("penalty kat gayi"));
     expect(evs.some((e) => e.type === "action")).toBe(true);
@@ -308,6 +350,8 @@ describe("buildSystemPrompt: next steps", () => {
   });
   it("omits the date line when none is given", () => {
     expect(buildSystemPrompt({ lang: "hi" })).not.toMatch(/Today's date/);
-    expect(buildSystemPrompt({ lang: "hi", today: "2026-10-17" })).toContain("Today's date for the worker is 2026-10-17");
+    expect(buildSystemPrompt({ lang: "hi", today: "2026-10-17" })).toContain(
+      "Today's date for the worker is 2026-10-17",
+    );
   });
 });

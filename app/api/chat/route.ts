@@ -1,6 +1,11 @@
 import { runChat } from "@/lib/agent/chat";
 import { ChatRequest, encodeEvent, type ChatEvent } from "@/lib/agent/events";
+import { redactPII } from "@/lib/safety/pii";
+import { tooLarge } from "@/lib/server/http";
 import { clientKey, rateLimit } from "@/lib/server/ratelimit";
+
+/** 24 messages of 4,000 characters is well under this, even in a script that needs 3 bytes a letter. */
+const MAX_CHAT_BODY_BYTES = 512_000;
 
 const NDJSON = {
   "Content-Type": "application/x-ndjson; charset=utf-8",
@@ -15,11 +20,13 @@ function oneShot(event: ChatEvent, status: number, extra: Record<string, string>
 export async function POST(request: Request) {
   const limit = rateLimit(clientKey(request.headers));
   if (!limit.ok) {
-    return oneShot(
-      { type: "error", code: "rate_limited", message: "Too many requests. Please wait a minute." },
-      429,
-      { "Retry-After": String(limit.retryAfterSec) },
-    );
+    return oneShot({ type: "error", code: "rate_limited", message: "Too many requests. Please wait a minute." }, 429, {
+      "Retry-After": String(limit.retryAfterSec),
+    });
+  }
+
+  if (tooLarge(request, MAX_CHAT_BODY_BYTES)) {
+    return oneShot({ type: "error", code: "bad_request", message: "Request too large" }, 413);
   }
 
   let body: unknown;
@@ -40,8 +47,11 @@ export async function POST(request: Request) {
         for await (const event of runChat(parsed.data, { signal: request.signal })) {
           controller.enqueue(encoder.encode(encodeEvent(event)));
         }
-      } catch {
-        controller.enqueue(encoder.encode(encodeEvent({ type: "error", code: "llm_error", message: "Something went wrong." })));
+      } catch (err) {
+        console.error("chat stream failure:", redactPII(String((err as Error)?.message ?? err)).text);
+        controller.enqueue(
+          encoder.encode(encodeEvent({ type: "error", code: "llm_error", message: "Something went wrong." })),
+        );
         controller.enqueue(encoder.encode(encodeEvent({ type: "done" })));
       } finally {
         controller.close();

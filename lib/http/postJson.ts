@@ -6,11 +6,9 @@
 
 export type FetchLike = (input: string, init: RequestInit) => Promise<Pick<Response, "ok" | "status" | "json">>;
 
-export type ApiBody<T> = Partial<T> & { error?: string };
+type ApiBody<T> = Partial<T> & { error?: string };
 
-export type JsonResult<T> =
-  | { offline: true }
-  | { offline: false; ok: boolean; status: number; data: ApiBody<T> };
+export type JsonResult<T> = { offline: true } | { offline: false; ok: boolean; status: number; data: ApiBody<T> };
 
 export async function postJson<T>(
   url: string,

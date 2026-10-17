@@ -8,6 +8,18 @@ export function json(body: unknown, status = 200, headers: Record<string, string
   });
 }
 
+/** The biggest body any route accepts: a photo is about 4 MB of text once base64-encoded, the rest is a few KB. */
+const MAX_BODY_BYTES = 4_500_000;
+
+/**
+ * A 413 Response if the request says its body is bigger than `max`, otherwise null. This runs before
+ * the body is read: the field limits in the Zod schemas only apply once all of it is already in memory.
+ */
+export function tooLarge(request: Request, max = MAX_BODY_BYTES): Response | null {
+  const declared = Number(request.headers.get("content-length"));
+  return declared > max ? json({ error: "too_large" }, 413) : null;
+}
+
 /** Returns a 429 Response if this client is over its limit for `bucket`, otherwise null. */
 export function tooMany(request: Request, bucket: string): Response | null {
   const r = rateLimit(`${bucket}:${clientKey(request.headers)}`);
@@ -18,6 +30,9 @@ export async function readBody<S extends z.ZodType>(
   request: Request,
   schema: S,
 ): Promise<{ ok: true; data: z.infer<S> } | { ok: false; res: Response }> {
+  const big = tooLarge(request);
+  if (big) return { ok: false, res: big };
+
   let raw: unknown;
   try {
     raw = await request.json();

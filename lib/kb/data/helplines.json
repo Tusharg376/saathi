@@ -13,7 +13,18 @@
     "name": "Ambulance",
     "number": "108",
     "purpose": "Free emergency ambulance in most states.",
-    "keywords": ["ambulance", "accident", "injured", "bleeding", "unconscious", "heart attack", "hospital", "एम्बुलेंस", "दुर्घटना", "चोट"],
+    "keywords": [
+      "ambulance",
+      "accident",
+      "injured",
+      "bleeding",
+      "unconscious",
+      "heart attack",
+      "hospital",
+      "एम्बुलेंस",
+      "दुर्घटना",
+      "चोट"
+    ],
     "available": "24x7",
     "source_url": "https://112.gov.in/"
   },

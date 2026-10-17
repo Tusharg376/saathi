@@ -17,7 +17,10 @@ const EligibilityArgs = z.object({
   age: z.number().int().min(0).max(120).optional().describe("Worker's age in years"),
   state: z.string().optional().describe("Indian state the worker works in, e.g. Karnataka"),
   workerType: WorkerType.optional(),
-  isPlatformWorker: z.boolean().optional().describe("Works through an app or platform (Swiggy, Zomato, Uber, Ola, Rapido...)"),
+  isPlatformWorker: z
+    .boolean()
+    .optional()
+    .describe("Works through an app or platform (Swiggy, Zomato, Uber, Ola, Rapido...)"),
   monthlyIncomeInr: z.number().min(0).optional().describe("Approximate monthly income in rupees"),
   isIncomeTaxPayer: z.boolean().optional(),
   inEpfoOrEsic: z.boolean().optional().describe("Member of EPFO (PF) or ESIC"),
@@ -29,7 +32,8 @@ const EligibilityArgs = z.object({
 /** What the model hears back after proposing something. It must not claim the proposal was carried out. */
 const PROPOSAL_SHOWN = {
   shown_to_worker: true,
-  instruction: "A card is now on the worker's screen. Tell them they can check it there. NEVER say it is already saved or sent.",
+  instruction:
+    "A card is now on the worker's screen. Tell them they can check it there. NEVER say it is already saved or sent.",
 };
 
 /**
@@ -49,7 +53,10 @@ export function buildTools(profile: WorkerProfile = {}): ToolDef[] {
       run: ({ query, category }) => {
         const hits = searchKb(query, { category, state: profile.state, limit: 3 });
         if (hits.length === 0) {
-          return { results: [], note: "Nothing relevant found. Do not guess. Say you are not sure and call lookup_helpline." };
+          return {
+            results: [],
+            note: "Nothing relevant found. Do not guess. Say you are not sure and call lookup_helpline.",
+          };
         }
         return { results: hits.map((h) => compactForModel(h.entry)) };
       },
@@ -77,13 +84,17 @@ export function buildTools(profile: WorkerProfile = {}): ToolDef[] {
       name: "lookup_helpline",
       description:
         "Find the right helpline for a situation (accident, harassment, cyber fraud, e-Shram help, legal aid...). Use when the knowledge base has no answer or when a call is the best next step.",
-      args: z.object({ situation: z.string().min(2).describe("Short English description, e.g. 'online payment fraud'") }),
+      args: z.object({
+        situation: z.string().min(2).describe("Short English description, e.g. 'online payment fraud'"),
+      }),
       run: ({ situation }) => {
         const hits = findHelplines(situation, 3);
         if (hits.length === 0) {
           return { helplines: [{ name: "Emergency", number: "112", purpose: "Police, fire, ambulance" }] };
         }
-        return { helplines: hits.map((h) => ({ name: h.name, number: h.number, purpose: h.purpose, available: h.available })) };
+        return {
+          helplines: hits.map((h) => ({ name: h.name, number: h.number, purpose: h.purpose, available: h.available })),
+        };
       },
     }),
 

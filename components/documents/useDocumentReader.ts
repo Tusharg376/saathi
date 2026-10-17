@@ -45,7 +45,11 @@ export function useDocumentReader() {
         note: note.trim() || undefined,
         lang,
       });
-      setPhase(outcome.kind === "insight" ? { name: "done", insight: outcome.insight } : { name: "error", key: FAILURE_TEXT[outcome.kind] });
+      setPhase(
+        outcome.kind === "insight"
+          ? { name: "done", insight: outcome.insight }
+          : { name: "error", key: FAILURE_TEXT[outcome.kind] },
+      );
     } catch (e) {
       setPhase({ name: "error", key: e instanceof ImageError ? "earn.err.image" : "doc.err.generic" });
     }

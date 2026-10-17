@@ -15,7 +15,10 @@ export function FlagsCard({ flags, onComplain }: { flags: Anomaly[]; onComplain:
   if (flags.length === 0) return null;
 
   return (
-    <section aria-labelledby="flags-h" className="space-y-2 rounded-2xl border-2 border-dashed border-tarmac bg-paper p-4">
+    <section
+      aria-labelledby="flags-h"
+      className="space-y-2 rounded-2xl border-2 border-dashed border-tarmac bg-paper p-4"
+    >
       <h2 id="flags-h" className="flex items-center gap-2 font-extrabold">
         <AlertTriangle size={20} aria-hidden />
         {t("earn.flags")}

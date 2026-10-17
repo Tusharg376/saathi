@@ -40,9 +40,7 @@ export interface RequestInput {
 
 /** The request for the drafting endpoint. Only answered questions are sent, and never contact details. */
 export function buildGrievanceRequest(i: RequestInput): GrievanceRequest {
-  const answers = (i.questions ?? [])
-    .map((q, n) => ({ q, a: (i.answers?.[n] ?? "").trim() }))
-    .filter((x) => x.a);
+  const answers = (i.questions ?? []).map((q, n) => ({ q, a: (i.answers?.[n] ?? "").trim() })).filter((x) => x.a);
 
   return {
     issue: i.issue,

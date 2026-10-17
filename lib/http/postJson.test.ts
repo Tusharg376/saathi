@@ -40,7 +40,13 @@ describe("failureOf", () => {
     expect(await kind(200, { ok: true })).toBeNull();
   });
   it("tells offline, no key, rate limited and other failures apart", async () => {
-    expect(failureOf(await postJson("/x", {}, async () => { throw new Error("x"); }))).toBe("offline");
+    expect(
+      failureOf(
+        await postJson("/x", {}, async () => {
+          throw new Error("x");
+        }),
+      ),
+    ).toBe("offline");
     expect(await kind(503, { error: "no_key" })).toBe("no_key");
     expect(await kind(429, { error: "rate_limited" })).toBe("rate_limited");
     expect(await kind(502, { error: "llm_error" })).toBe("failed");

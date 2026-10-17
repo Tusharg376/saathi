@@ -22,7 +22,12 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     // Long-press the home-screen icon: one tap to the two things needed fastest.
     shortcuts: [
-      { name: "Emergency", short_name: "SOS", url: "/sos", icons: [{ src: "/icons/192", sizes: "192x192", type: "image/png" }] },
+      {
+        name: "Emergency",
+        short_name: "SOS",
+        url: "/sos",
+        icons: [{ src: "/icons/192", sizes: "192x192", type: "image/png" }],
+      },
       { name: "Earnings", url: "/earnings", icons: [{ src: "/icons/192", sizes: "192x192", type: "image/png" }] },
     ],
   };

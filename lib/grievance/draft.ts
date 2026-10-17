@@ -5,11 +5,20 @@ import { ISSUES, issueEntry, repairRedactionTokens, type Issue } from "./letter"
 
 /** What the model must fill. letter is formal; summary_for_worker, questions and evidence are in the worker's language. */
 export const GrievanceDraft = z.object({
-  needs_info: z.boolean().describe("True only if essential facts are missing and one short round of questions is needed."),
-  questions: z.array(z.string()).max(3).describe("Up to 3 short questions in the worker's language. Empty unless needs_info."),
+  needs_info: z
+    .boolean()
+    .describe("True only if essential facts are missing and one short round of questions is needed."),
+  questions: z
+    .array(z.string())
+    .max(3)
+    .describe("Up to 3 short questions in the worker's language. Empty unless needs_info."),
   subject: z.string().describe("Email subject line in English."),
   letter: z.string().describe("The complete letter. Empty only if needs_info."),
-  summary_for_worker: z.string().describe("3 to 5 simple sentences in the worker's language saying what the letter says and asks. Empty only if needs_info."),
+  summary_for_worker: z
+    .string()
+    .describe(
+      "3 to 5 simple sentences in the worker's language saying what the letter says and asks. Empty only if needs_info.",
+    ),
   evidence: z.array(z.string()).max(8).describe("Evidence to collect, in the worker's language."),
 });
 export type GrievanceDraft = z.infer<typeof GrievanceDraft>;
@@ -30,13 +39,21 @@ export const GrievanceRequest = z.object({
     })
     .optional(),
   /** Answers to the questions from a first round. */
-  answers: z.array(z.object({ q: z.string().max(300), a: z.string().max(500) })).max(3).optional(),
+  answers: z
+    .array(z.object({ q: z.string().max(300), a: z.string().max(500) }))
+    .max(3)
+    .optional(),
   /** After one round of questions, the model must draft with what it has. */
   final: z.boolean().optional(),
 });
 export type GrievanceRequest = z.infer<typeof GrievanceRequest>;
 
-export function buildGrievancePrompt(opts: { issue: Issue; langName: string; letterLangName: string; final: boolean }): string {
+export function buildGrievancePrompt(opts: {
+  issue: Issue;
+  langName: string;
+  letterLangName: string;
+  final: boolean;
+}): string {
   const entry = issueEntry(opts.issue);
   const route = entry
     ? `
@@ -120,7 +137,10 @@ const clean = (s: string, n: number) => s.trim().slice(0, n);
  */
 export function normalizeDraft(raw: GrievanceDraft, final: boolean): NormalizedDraft | null {
   const letter = repairRedactionTokens(clean(raw.letter, 4000));
-  const questions = raw.questions.map((q) => clean(q, 200)).filter(Boolean).slice(0, 3);
+  const questions = raw.questions
+    .map((q) => clean(q, 200))
+    .filter(Boolean)
+    .slice(0, 3);
   const needsInfo = !final && raw.needs_info && questions.length > 0;
 
   if (needsInfo) {
@@ -135,6 +155,9 @@ export function normalizeDraft(raw: GrievanceDraft, final: boolean): NormalizedD
     subject: clean(raw.subject, 140),
     letter,
     summary: clean(raw.summary_for_worker, 800),
-    evidence: raw.evidence.map((e) => clean(e, 160)).filter(Boolean).slice(0, 8),
+    evidence: raw.evidence
+      .map((e) => clean(e, 160))
+      .filter(Boolean)
+      .slice(0, 8),
   };
 }

@@ -16,6 +16,12 @@ describe("PII redaction", () => {
     }
   });
 
+  it("redacts mobile numbers written the way people write them: split in the middle, with spaces or hyphens", () => {
+    for (const p of ["98765 43210", "98765-43210", "+91 98765 43210", "+91-98765-43210"]) {
+      expect(redactPII(`call ${p} now`).text).toBe("call [PHONE] now");
+    }
+  });
+
   it("redacts PAN, IFSC, email and UPI ids", () => {
     expect(redactPII("PAN ABCDE1234F").text).toBe("PAN [PAN]");
     expect(redactPII("ifsc SBIN0001234").text).toBe("ifsc [IFSC]");

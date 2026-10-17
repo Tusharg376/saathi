@@ -8,7 +8,19 @@ const form = (over: Partial<QualifyForm> = {}): QualifyForm => ({ ...EMPTY_QUALI
 describe("profileFromForm", () => {
   it("turns the answers into a profile", () => {
     expect(
-      profileFromForm(form({ age: "34", state: " Bihar ", workerType: "delivery", income: "14,000", platform: "yes", tax: "no", pf: "no", bank: "yes", eshram: "no" })),
+      profileFromForm(
+        form({
+          age: "34",
+          state: " Bihar ",
+          workerType: "delivery",
+          income: "14,000",
+          platform: "yes",
+          tax: "no",
+          pf: "no",
+          bank: "yes",
+          eshram: "no",
+        }),
+      ),
     ).toEqual({
       age: 34,
       state: "Bihar",
@@ -43,7 +55,17 @@ describe("profileFromForm", () => {
 
 describe("formFromProfile", () => {
   it("round-trips a saved profile", () => {
-    const f = form({ age: "34", state: "Bihar", workerType: "cab_driver", income: "14000", platform: "yes", tax: "no", pf: "no", bank: "yes", eshram: "no" });
+    const f = form({
+      age: "34",
+      state: "Bihar",
+      workerType: "cab_driver",
+      income: "14000",
+      platform: "yes",
+      tax: "no",
+      pf: "no",
+      bank: "yes",
+      eshram: "no",
+    });
     expect(formFromProfile(profileFromForm(f))).toEqual(f);
   });
   it("shows an empty profile as an empty form", () => {

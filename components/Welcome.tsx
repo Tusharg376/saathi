@@ -6,8 +6,9 @@ import { useI18n } from "@/lib/i18n/provider";
 import type { MessageKey } from "@/lib/i18n/messages";
 
 /** Each feature adds its tile when its page exists, so no tile ever points at a dead route. */
-const TILES: { href: string; key: MessageKey; Icon: typeof Scale; cls: string; wide?: boolean }[] = [
-  { href: "/earnings", key: "nav.earnings", Icon: IndianRupee, cls: "bg-plate text-tarmac" },
+const TILES: { href: string; key: MessageKey; Icon: typeof Scale; cls: string; wide?: boolean; prefetch?: false }[] = [
+  // Not prefetched, like the Earnings tab: its on-device database is about 40 KB that most visits never use.
+  { href: "/earnings", key: "nav.earnings", Icon: IndianRupee, cls: "bg-plate text-tarmac", prefetch: false },
   { href: "/rights", key: "tile.rights", Icon: Scale, cls: "bg-paper text-tarmac" },
   { href: "/help/documents", key: "help.docs", Icon: Camera, cls: "bg-paper text-tarmac" },
   { href: "/help/complaint", key: "help.complaint", Icon: PenLine, cls: "bg-paper text-tarmac" },
@@ -41,10 +42,11 @@ export function Welcome({ onAsk }: { onAsk: (text: string) => void }) {
       </ul>
 
       <ul className="grid grid-cols-2 gap-3">
-        {TILES.map(({ href, key, Icon, cls, wide }) => (
+        {TILES.map(({ href, key, Icon, cls, wide, prefetch }) => (
           <li key={href} className={wide ? "col-span-2" : undefined}>
             <Link
               href={href}
+              prefetch={prefetch}
               className={`flex min-h-32 flex-col justify-between rounded-2xl border-2 border-tarmac p-4 active:opacity-80 ${cls}`}
             >
               <Icon size={30} aria-hidden strokeWidth={2.25} />

@@ -15,7 +15,7 @@ import {
 } from "@google/genai";
 import { z } from "zod";
 import { LlmError, LlmUnavailableError, toLlmError, withRetry } from "./errors";
-import { resolveModel, type ModelTier } from "./models";
+import { resolveModel, usesDefaultSampling, type ModelTier } from "./models";
 import { executeToolCall, type ToolDef, type ToolLoopEvent } from "./tools";
 
 export type { Content, Part };
@@ -34,7 +34,7 @@ function getClient(): GoogleGenAI {
   return cached.client;
 }
 
-export type Thinking = "minimal" | "low" | "medium" | "high";
+type Thinking = "minimal" | "low" | "medium" | "high";
 
 export interface GenerateOptions {
   model?: ModelTier | string;
@@ -55,7 +55,9 @@ const THINKING_LEVELS: Record<Thinking, ThinkingLevel> = {
 function buildConfig(opts: GenerateOptions, extra: GenerateContentConfig = {}): GenerateContentConfig {
   const config: GenerateContentConfig = { ...extra };
   if (opts.system) config.systemInstruction = opts.system;
-  if (opts.temperature !== undefined) config.temperature = opts.temperature;
+  if (opts.temperature !== undefined && !usesDefaultSampling(resolveModel(opts.model))) {
+    config.temperature = opts.temperature;
+  }
   if (opts.maxOutputTokens !== undefined) config.maxOutputTokens = opts.maxOutputTokens;
   if (opts.thinking) config.thinkingConfig = { thinkingLevel: THINKING_LEVELS[opts.thinking] };
   if (opts.signal) config.abortSignal = opts.signal;
@@ -122,7 +124,10 @@ type Parsed<S extends z.ZodType> = { ok: true; data: z.infer<S> } | { ok: false;
 
 function tryParse<S extends z.ZodType>(schema: S, text: string): Parsed<S> {
   try {
-    const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+    const cleaned = text
+      .trim()
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "");
     const result = schema.safeParse(JSON.parse(cleaned));
     if (result.success) return { ok: true, data: result.data };
     return { ok: false, error: result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") };
@@ -154,7 +159,9 @@ export async function generateJSON<S extends z.ZodType>(
   const retry = await ask([
     ...base,
     modelText(first),
-    userText(`That JSON was invalid: ${parsed.error}. Reply again with ONLY valid JSON that matches the schema exactly.`),
+    userText(
+      `That JSON was invalid: ${parsed.error}. Reply again with ONLY valid JSON that matches the schema exactly.`,
+    ),
   ]);
   const second = tryParse(schema, retry);
   if (second.ok) return second.data;

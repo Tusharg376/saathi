@@ -22,6 +22,12 @@ const urgent: Case[] = [
   ["my shop caught fire", "urgent", "fire"],
   ["someone stalking me right now, I feel unsafe", "urgent", "harassment"],
   ["abhi mere paise kat gaye, scam hua", "urgent", "fraud"],
+  ["abhi mere khate se paise kat gaye", "urgent", "fraud"],
+  // A request to explain must not hide a real emergency: "please" next to a physical danger is still a cry for help.
+  ["he is bleeding, please explain what to do", "urgent", "medical"],
+  ["car crash just now, please send someone", "urgent", "medical"],
+  ["I crashed my bike, my leg is bleeding", "urgent", "medical"],
+  ["an angry mob is chasing me right now", "urgent", "violence"],
   // Native scripts
   ["मेरा एक्सीडेंट हो गया है, खून बह रहा है, मदद करो", "urgent", "medical"],
   ["मुझे बचाओ", "urgent"],
@@ -40,6 +46,12 @@ const possible: Case[] = [
   ["customer ne dhamki di thi", "possible", "violence"],
   ["bike crashed last week", "possible", "medical"],
   ["कल एक्सीडेंट हुआ था", "possible", "medical"],
+  // Money trouble alone is a soft note unless something is happening right now.
+  ["help me understand this scam message", "possible", "fraud"],
+  ["I was cheated by a customer yesterday, help", "possible", "fraud"],
+  // A bank or account next to "money cut" still counts as a possible scam.
+  ["mere account se paise kat gaye kal", "possible", "fraud"],
+  ["कल मेरे खाते से पैसे कट गए", "possible", "fraud"],
 ];
 
 const benign: string[] = [
@@ -52,6 +64,14 @@ const benign: string[] = [
   "company will fire me if I cancel",
   "help me fill this form",
   "help me find a scheme",
+  // Words that merely look like an emergency
+  "my app crashed now",
+  "the delivery app keeps crashing",
+  "please tell me my mob number is wrong",
+  "please send the mob no to the customer",
+  "short circuit in my phone charger",
+  "money was deducted please explain",
+  "please explain this deduction",
   "आगे क्या करना है",
   "दुर्घटना बीमा कैसे मिलेगा",
   "આગળ શું કરવું",
@@ -102,7 +122,10 @@ describe("emergency detector: routing", () => {
   });
 
   it("medical points to 108 then 112; harassment points to 181; fraud to 1930", () => {
-    expect(detectEmergency("accident just now, bleeding").helplines.slice(0, 2)).toEqual(["ambulance_108", "emergency_112"]);
+    expect(detectEmergency("accident just now, bleeding").helplines.slice(0, 2)).toEqual([
+      "ambulance_108",
+      "emergency_112",
+    ]);
     expect(detectEmergency("someone is stalking me right now").helplines[0]).toBe("women_181");
     expect(detectEmergency("abhi paise kat gaye, scam").helplines).toContain("cyber_1930");
   });

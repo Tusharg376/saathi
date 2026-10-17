@@ -46,7 +46,8 @@ export function draftFromEntry(e: NewEntry): Draft {
   };
 }
 
-export type DraftResult = { ok: true; entry: NewEntry } | { ok: false; errors: Partial<Record<DraftField, DraftError>> };
+export type DraftResult =
+  { ok: true; entry: NewEntry } | { ok: false; errors: Partial<Record<DraftField, DraftError>> };
 
 const MAX_MONEY = 200_000;
 
@@ -64,7 +65,10 @@ const NUMERIC: Record<NumericField, { max: number; whole?: boolean }> = {
 };
 
 /** Blank means zero. Anything typed that is not a number is an error, never silently zero. */
-function readNumber(raw: string, { max, whole }: { max: number; whole?: boolean }): { value: number } | { error: DraftError } {
+function readNumber(
+  raw: string,
+  { max, whole }: { max: number; whole?: boolean },
+): { value: number } | { error: DraftError } {
   const text = raw.trim();
   if (text === "") return { value: 0 };
   const n = parseAmount(text);

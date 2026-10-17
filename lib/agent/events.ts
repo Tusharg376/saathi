@@ -10,8 +10,7 @@ import type { EmergencyKind } from "../safety/emergency";
  * is saved or sent until the worker confirms on screen.
  */
 export type ChatAction =
-  | { kind: "log_earning"; entry: NewEntry }
-  | { kind: "start_complaint"; issue: Issue; summary: string; party?: string };
+  { kind: "log_earning"; entry: NewEntry } | { kind: "start_complaint"; issue: Issue; summary: string; party?: string };
 
 /**
  * The wire protocol between /api/chat and the chat UI: newline-delimited JSON,

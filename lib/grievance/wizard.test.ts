@@ -14,10 +14,17 @@ describe("detailsFrom", () => {
       ids: "T-1",
       city: "Lucknow",
     });
-    expect(detailsFrom(EMPTY_FIELDS)).toEqual({ party: undefined, dates: undefined, amountInr: undefined, ids: undefined, city: undefined });
+    expect(detailsFrom(EMPTY_FIELDS)).toEqual({
+      party: undefined,
+      dates: undefined,
+      amountInr: undefined,
+      ids: undefined,
+      city: undefined,
+    });
   });
   it("ignores an amount that is not a positive number", () => {
-    for (const amount of ["abc", "0", "-5", "  "]) expect(detailsFrom({ ...EMPTY_FIELDS, amount }).amountInr).toBeUndefined();
+    for (const amount of ["abc", "0", "-5", "  "])
+      expect(detailsFrom({ ...EMPTY_FIELDS, amount }).amountInr).toBeUndefined();
   });
   it("rounds to whole rupees", () => {
     expect(detailsFrom({ ...EMPTY_FIELDS, amount: "1200.6" }).amountInr).toBe(1201);
@@ -25,7 +32,14 @@ describe("detailsFrom", () => {
 });
 
 describe("buildGrievanceRequest", () => {
-  const base = { issue: "short_payment" as const, lang: "hi" as const, letterLang: "en" as const, description: "  They did not pay me Rs 1200.  ", fields: EMPTY_FIELDS, final: false };
+  const base = {
+    issue: "short_payment" as const,
+    lang: "hi" as const,
+    letterLang: "en" as const,
+    description: "  They did not pay me Rs 1200.  ",
+    fields: EMPTY_FIELDS,
+    final: false,
+  };
 
   it("produces a request the server accepts", () => {
     expect(GrievanceRequest.safeParse(buildGrievanceRequest(base)).success).toBe(true);
@@ -36,7 +50,12 @@ describe("buildGrievanceRequest", () => {
     expect(r.final).toBe(true);
   });
   it("sends only the questions that were answered", () => {
-    const r = buildGrievanceRequest({ ...base, final: true, questions: ["Which app?", "When?"], answers: ["Swiggy", "  "] });
+    const r = buildGrievanceRequest({
+      ...base,
+      final: true,
+      questions: ["Which app?", "When?"],
+      answers: ["Swiggy", "  "],
+    });
     expect(r.answers).toEqual([{ q: "Which app?", a: "Swiggy" }]);
   });
   it("omits answers when none were given", () => {
@@ -56,7 +75,14 @@ describe("viewFromOutcome", () => {
     contact: { name: "Raju Kumar", phone: "9876543210", city: "Lucknow" },
     date: "17 October 2026",
   };
-  const draft = { needsInfo: false, questions: [], subject: "Complaint", letter: "Date: {{date}}\nYours,\n{{name}}\n{{phone}}", summary: "It asks Swiggy to pay.", evidence: ["Screenshot"] };
+  const draft = {
+    needsInfo: false,
+    questions: [],
+    subject: "Complaint",
+    letter: "Date: {{date}}\nYours,\n{{name}}\n{{phone}}",
+    summary: "It asks Swiggy to pay.",
+    evidence: ["Screenshot"],
+  };
 
   it("fills the worker's own details into an AI letter, locally", () => {
     const v = viewFromOutcome({ kind: "letter", draft }, ctx);
@@ -84,10 +110,15 @@ describe("viewFromOutcome", () => {
 
 describe("sanitizeContact", () => {
   it("keeps three bounded text fields and nothing else", () => {
-    expect(sanitizeContact({ name: "Raju", phone: "98", city: "Delhi", aadhaar: "2345 6789 0123" })).toEqual({ name: "Raju", phone: "98", city: "Delhi" });
+    expect(sanitizeContact({ name: "Raju", phone: "98", city: "Delhi", aadhaar: "2345 6789 0123" })).toEqual({
+      name: "Raju",
+      phone: "98",
+      city: "Delhi",
+    });
   });
   it("bounds length and tolerates junk", () => {
     expect(sanitizeContact({ name: "x".repeat(500) }).name).toHaveLength(80);
-    for (const junk of [null, undefined, "x", 5, [], { name: 5 }]) expect(sanitizeContact(junk)).toEqual({ name: "", phone: "", city: "" });
+    for (const junk of [null, undefined, "x", 5, [], { name: 5 }])
+      expect(sanitizeContact(junk)).toEqual({ name: "", phone: "", city: "" });
   });
 });

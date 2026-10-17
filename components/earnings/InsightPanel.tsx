@@ -33,7 +33,9 @@ export function InsightPanel({ dashboard, today }: { dashboard: Dashboard; today
 
       {insight.status === "done" && (
         <div className="rounded-2xl border-2 border-tarmac bg-paper p-4">
-          <h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-ink-soft">{t("earn.explain_title")}</h3>
+          <h3 className="mb-1 text-sm font-extrabold uppercase tracking-wide text-ink-soft">
+            {t("earn.explain_title")}
+          </h3>
           <p className="whitespace-pre-wrap text-lg">{insight.text}</p>
           <SpeakButton text={insight.text} className="mt-3" />
         </div>

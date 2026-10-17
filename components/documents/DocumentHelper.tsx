@@ -40,7 +40,11 @@ export function DocumentHelper() {
       {preview && (
         // A plain <img> on purpose: this is a blob: URL of the worker's own photo, not an optimisable asset.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={preview} alt="" className="max-h-48 w-full rounded-2xl border-2 border-tarmac bg-paper object-contain" />
+        <img
+          src={preview}
+          alt=""
+          className="max-h-48 w-full rounded-2xl border-2 border-tarmac bg-paper object-contain"
+        />
       )}
 
       {reading && (

@@ -13,7 +13,12 @@ function streaming(chunks: string[]) {
       controller.close();
     },
   });
-  return vi.fn().mockResolvedValue({ body });
+  return vi.fn().mockResolvedValue({
+    body,
+    ok: true,
+    status: 200,
+    headers: new Headers({ "content-type": "application/x-ndjson" }),
+  });
 }
 
 const line = (e: unknown) => JSON.stringify(e) + "\n";
@@ -53,6 +58,9 @@ describe("streamChat", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-type": "application/x-ndjson" }),
         body: new ReadableStream<Uint8Array>({
           start(c) {
             c.enqueue(bytes.slice(0, cut));
@@ -77,8 +85,25 @@ describe("streamChat", () => {
     await expect(streamChat(request, () => undefined)).rejects.toThrow();
   });
 
+  it("rejects on a server or host error that is not one of our own event streams, so the screen can fall back", async () => {
+    const html = new Response("<html>Bad gateway</html>", { status: 502, headers: { "content-type": "text/html" } });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(html));
+    await expect(streamChat(request, () => undefined)).rejects.toThrow(/502/);
+  });
+
+  it("still delivers our own error events when the status is not OK (rate limited)", async () => {
+    const limited = new Response(JSON.stringify({ type: "error", code: "rate_limited", message: "x" }) + "\n", {
+      status: 429,
+      headers: { "content-type": "application/x-ndjson" },
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(limited));
+    const events: ChatEvent[] = [];
+    await streamChat(request, (e) => events.push(e));
+    expect(events).toEqual([{ type: "error", code: "rate_limited", message: "x" }]);
+  });
+
   it("rejects when there is no response body", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ body: null }));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ body: null, ok: true, status: 200 }));
     await expect(streamChat(request, () => undefined)).rejects.toThrow(/body/i);
   });
 

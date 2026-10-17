@@ -72,7 +72,9 @@ describe("check_scheme_eligibility", () => {
   });
 
   it("asks for one missing fact at a time", async () => {
-    const r = (await run("check_scheme_eligibility", { age: 30, schemeIds: ["scheme.pmsym"] })) as { ask_next?: string };
+    const r = (await run("check_scheme_eligibility", { age: 30, schemeIds: ["scheme.pmsym"] })) as {
+      ask_next?: string;
+    };
     expect(r.ask_next).toMatch(/^Tell me /);
   });
 

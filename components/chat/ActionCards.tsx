@@ -8,8 +8,7 @@ import { ISSUE_LABEL } from "@/lib/grievance/labels";
 import { useHandoffNav } from "@/lib/useHandoffNav";
 
 const card = "space-y-2 rounded-2xl border-2 border-tarmac bg-plate/40 p-3";
-const button =
-  "flex min-h-11 items-center gap-2 rounded-full bg-tarmac px-4 font-bold text-white active:opacity-80";
+const button = "flex min-h-11 items-center gap-2 rounded-full bg-tarmac px-4 font-bold text-white active:opacity-80";
 
 /**
  * Next steps the assistant suggests. These only open the right screen with the details filled in:

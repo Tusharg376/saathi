@@ -96,13 +96,20 @@ describe("buildTemplateLetter (no AI)", () => {
 
   it("addresses the right recipient for each kind of complaint", () => {
     expect(buildTemplateLetter("short_payment", desc, { party: "Swiggy" })).toContain("The Grievance Officer, Swiggy");
-    expect(buildTemplateLetter("wage_theft", desc, { party: "Sharma Contractors" })).toContain("The Labour Commissioner");
+    expect(buildTemplateLetter("wage_theft", desc, { party: "Sharma Contractors" })).toContain(
+      "The Labour Commissioner",
+    );
     expect(buildTemplateLetter("challan", desc)).toContain("traffic challans");
     expect(buildTemplateLetter("harassment", desc, { party: "Uber" })).toContain("Safety Team");
   });
 
   it("states details and a clear request, and asks for a reply politely", () => {
-    const l = buildTemplateLetter("short_payment", desc, { party: "Swiggy", dates: "12 Oct 2026", amountInr: 120000, ids: "ORD123" });
+    const l = buildTemplateLetter("short_payment", desc, {
+      party: "Swiggy",
+      dates: "12 Oct 2026",
+      amountInr: 120000,
+      ids: "ORD123",
+    });
     expect(l).toContain("Against: Swiggy");
     expect(l).toContain("Date(s): 12 Oct 2026");
     expect(l).toContain("Rs 1,20,000");
@@ -130,7 +137,12 @@ describe("buildTemplateLetter (no AI)", () => {
   });
 
   it("a filled template has no unresolved placeholders except what the worker left out", () => {
-    const filled = fillPlaceholders(buildTemplateLetter("short_payment", desc), { name: "R", phone: "1", city: "C", date: "D" });
+    const filled = fillPlaceholders(buildTemplateLetter("short_payment", desc), {
+      name: "R",
+      phone: "1",
+      city: "C",
+      date: "D",
+    });
     expect(unfilled(filled)).toEqual([]);
   });
 });
@@ -144,7 +156,10 @@ describe("normalizeDraft", () => {
   });
 
   it("returns questions in the first round when essentials are missing", () => {
-    const d = normalizeDraft(rawDraft({ needs_info: true, questions: ["Which app?", "When?"], letter: "", summary_for_worker: "" }), false)!;
+    const d = normalizeDraft(
+      rawDraft({ needs_info: true, questions: ["Which app?", "When?"], letter: "", summary_for_worker: "" }),
+      false,
+    )!;
     expect(d).toMatchObject({ needsInfo: true, questions: ["Which app?", "When?"], letter: "" });
   });
 
@@ -176,7 +191,10 @@ describe("normalizeDraft", () => {
 
   it("bounds field lengths", () => {
     const long = "x".repeat(10_000);
-    const d = normalizeDraft(rawDraft({ letter: long, subject: long, summary_for_worker: long, evidence: [long] }), false)!;
+    const d = normalizeDraft(
+      rawDraft({ letter: long, subject: long, summary_for_worker: long, evidence: [long] }),
+      false,
+    )!;
     expect(d.letter.length).toBeLessThanOrEqual(4000);
     expect(d.subject.length).toBeLessThanOrEqual(140);
     expect(d.summary.length).toBeLessThanOrEqual(800);
@@ -185,10 +203,12 @@ describe("normalizeDraft", () => {
 });
 
 describe("prompt and input", () => {
-  const p = (final = false) => buildGrievancePrompt({ issue: "short_payment", langName: "Hindi", letterLangName: "English", final });
+  const p = (final = false) =>
+    buildGrievancePrompt({ issue: "short_payment", langName: "Hindi", letterLangName: "English", final });
 
   it("sets the safety rules the letter must follow", () => {
-    for (const needle of ["NEVER", "threaten", "{{name}}", "{{phone}}", "invent", "DATA", "[ADD:"]) expect(p(), needle).toContain(needle);
+    for (const needle of ["NEVER", "threaten", "{{name}}", "{{phone}}", "invent", "DATA", "[ADD:"])
+      expect(p(), needle).toContain(needle);
   });
 
   it("gives the model the real escalation route and evidence from the KB, not its own guess", () => {
@@ -202,7 +222,12 @@ describe("prompt and input", () => {
   });
 
   it("names both languages", () => {
-    const text = buildGrievancePrompt({ issue: "deactivation", langName: "Tamil", letterLangName: "Tamil", final: false });
+    const text = buildGrievancePrompt({
+      issue: "deactivation",
+      langName: "Tamil",
+      letterLangName: "Tamil",
+      final: false,
+    });
     expect(text).toContain("in Tamil");
   });
 
@@ -249,7 +274,12 @@ describe("handleGrievance", () => {
       headers: { "content-type": "application/json", "x-forwarded-for": ip },
       body: JSON.stringify(body),
     });
-  const ok = { issue: "short_payment", lang: "hi", letterLang: "en", description: "Swiggy did not pay me Rs 1200 for 12 October." };
+  const ok = {
+    issue: "short_payment",
+    lang: "hi",
+    letterLang: "en",
+    description: "Swiggy did not pay me Rs 1200 for 12 October.",
+  };
 
   beforeEach(() => {
     llm.keyPresent = true;
@@ -278,7 +308,9 @@ describe("handleGrievance", () => {
   });
 
   it("returns questions in round one", async () => {
-    llm.generateJSON.mockResolvedValue(rawDraft({ needs_info: true, questions: ["Which app?"], letter: "", summary_for_worker: "" }));
+    llm.generateJSON.mockResolvedValue(
+      rawDraft({ needs_info: true, questions: ["Which app?"], letter: "", summary_for_worker: "" }),
+    );
     const { draft } = await (await handleGrievance(post(ok))).json();
     expect(draft).toMatchObject({ needsInfo: true, questions: ["Which app?"] });
   });

@@ -41,19 +41,36 @@ describe("the golden dataset is sound", () => {
 
   it("every cited KB id exists, so a typo cannot silently make a case unfailable", () => {
     for (const c of CASES.filter((x): x is ChatCase => x.kind === "chat")) {
-      for (const ch of c.checks) if (ch.kind === "cites") for (const id of ch.anyOf) expect(getEntry(id), `${c.id}: ${id}`).toBeDefined();
+      for (const ch of c.checks)
+        if (ch.kind === "cites") for (const id of ch.anyOf) expect(getEntry(id), `${c.id}: ${id}`).toBeDefined();
     }
   });
 
   it("the script a case expects matches the language it is written in", () => {
-    const expected: Record<string, Script[]> = { hi: ["devanagari", "latin"], mr: ["devanagari"], bn: ["bengali"], ta: ["tamil"], te: ["telugu"], kn: ["kannada"], gu: ["gujarati"], en: ["latin"] };
+    const expected: Record<string, Script[]> = {
+      hi: ["devanagari", "latin"],
+      mr: ["devanagari"],
+      bn: ["bengali"],
+      ta: ["tamil"],
+      te: ["telugu"],
+      kn: ["kannada"],
+      gu: ["gujarati"],
+      en: ["latin"],
+    };
     for (const c of CASES.filter((x): x is ChatCase => x.kind === "chat")) {
       for (const ch of c.checks) if (ch.kind === "script") expect(expected[c.lang], c.id).toContain(ch.script);
     }
   });
 
   it("each chat message is actually written in its stated language", () => {
-    const want: Record<string, Script[]> = { mr: ["devanagari"], bn: ["bengali"], ta: ["tamil"], te: ["telugu"], kn: ["kannada"], gu: ["gujarati"] };
+    const want: Record<string, Script[]> = {
+      mr: ["devanagari"],
+      bn: ["bengali"],
+      ta: ["tamil"],
+      te: ["telugu"],
+      kn: ["kannada"],
+      gu: ["gujarati"],
+    };
     for (const c of CASES.filter((x): x is ChatCase => x.kind === "chat" && x.lang in want)) {
       expect(want[c.lang], c.id).toContain(dominantScript(c.message));
     }
@@ -66,7 +83,9 @@ describe("the golden dataset is sound", () => {
   });
 
   it("includes an emergency case and a not-an-emergency case, so the detector is checked both ways", () => {
-    const flags = CASES.filter((c): c is ChatCase => c.kind === "chat").flatMap((c) => c.checks.filter((k) => k.kind === "emergency"));
+    const flags = CASES.filter((c): c is ChatCase => c.kind === "chat").flatMap((c) =>
+      c.checks.filter((k) => k.kind === "emergency"),
+    );
     expect(flags.some((k) => k.kind === "emergency" && k.expected)).toBe(true);
     expect(flags.some((k) => k.kind === "emergency" && !k.expected)).toBe(true);
   });
@@ -107,20 +126,28 @@ describe("simple-language proxy", () => {
 describe("evaluateCheck", () => {
   const r = { text: "Call 108 now. PM-SYM is a pension.", sourceIds: ["scheme.pmsym"], emergency: true };
 
-  it("passes and fails each deterministic check for the right reason", () => {
-    expect(evaluateCheck({ kind: "cites", anyOf: ["scheme.pmsym"] }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "cites", anyOf: ["scheme.eshram"] }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "mentions", anyOf: ["108", "112"] }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "mentions", anyOf: ["1930"] }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "mentions_none", of: ["fraud@ybl"] }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "mentions_none", of: ["108"] }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "emergency", expected: true }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "emergency", expected: false }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "script", script: "latin" }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "script", script: "tamil" }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "max_avg_sentence_words", n: 5 }, r)?.pass).toBe(true);
-    expect(evaluateCheck({ kind: "max_avg_sentence_words", n: 2 }, r)?.pass).toBe(false);
-    expect(evaluateCheck({ kind: "plain_text" }, r)?.pass).toBe(true);
+  const pass = (check: Parameters<typeof evaluateCheck>[0]) => evaluateCheck(check, r)?.pass;
+
+  it("checks citations", () => {
+    expect(pass({ kind: "cites", anyOf: ["scheme.pmsym"] })).toBe(true);
+    expect(pass({ kind: "cites", anyOf: ["scheme.eshram"] })).toBe(false);
+  });
+  it("checks what the answer says and must not say", () => {
+    expect(pass({ kind: "mentions", anyOf: ["108", "112"] })).toBe(true);
+    expect(pass({ kind: "mentions", anyOf: ["1930"] })).toBe(false);
+    expect(pass({ kind: "mentions_none", of: ["fraud@ybl"] })).toBe(true);
+    expect(pass({ kind: "mentions_none", of: ["108"] })).toBe(false);
+  });
+  it("checks the emergency flag", () => {
+    expect(pass({ kind: "emergency", expected: true })).toBe(true);
+    expect(pass({ kind: "emergency", expected: false })).toBe(false);
+  });
+  it("checks the script, sentence length and plain text", () => {
+    expect(pass({ kind: "script", script: "latin" })).toBe(true);
+    expect(pass({ kind: "script", script: "tamil" })).toBe(false);
+    expect(pass({ kind: "max_avg_sentence_words", n: 5 })).toBe(true);
+    expect(pass({ kind: "max_avg_sentence_words", n: 2 })).toBe(false);
+    expect(pass({ kind: "plain_text" })).toBe(true);
   });
 
   it("leaves LLM-judged checks to the live runner", () => {
@@ -133,10 +160,20 @@ describe("evaluateCheck", () => {
 });
 
 describe("evaluateParse", () => {
-  const entry = { date: "2026-10-17", platform: "Swiggy", grossInr: 1850, deductionsInr: 0, fuelInr: 400, otherCostInr: 0, orders: 12 };
+  const entry = {
+    date: "2026-10-17",
+    platform: "Swiggy",
+    grossInr: 1850,
+    deductionsInr: 0,
+    fuelInr: 400,
+    otherCostInr: 0,
+    orders: 12,
+  };
 
   it("passes when every expected field matches", () => {
-    const out = evaluateParse({ entry: { grossInr: 1850, fuelInr: 400, orders: 12, platformIncludes: "swiggy" } }, [entry]);
+    const out = evaluateParse({ entry: { grossInr: 1850, fuelInr: 400, orders: 12, platformIncludes: "swiggy" } }, [
+      entry,
+    ]);
     expect(out.every((o) => o.pass)).toBe(true);
   });
   it("fails on a wrong number", () => {
@@ -156,14 +193,25 @@ describe("evaluateParse", () => {
 });
 
 describe("evaluateLetter", () => {
-  const good = "Date: {{date}}\nTo,\nThe Grievance Officer, Swiggy\nI am owed Rs 1200.\nYours faithfully,\n{{name}}\nPhone: {{phone}}";
+  const good =
+    "Date: {{date}}\nTo,\nThe Grievance Officer, Swiggy\nI am owed Rs 1200.\nYours faithfully,\n{{name}}\nPhone: {{phone}}";
 
   it("passes a clean letter that uses placeholders and the worker's facts", () => {
-    expect(evaluateLetter({ includes: ["Swiggy", "1200"], placeholdersOnly: true }, good).every((o) => o.pass)).toBe(true);
+    expect(evaluateLetter({ includes: ["Swiggy", "1200"], placeholdersOnly: true }, good).every((o) => o.pass)).toBe(
+      true,
+    );
   });
   it("flags threats and legal claims", () => {
-    for (const bad of ["I will sue you.", "I will go to court.", "Under section 12 you must pay.", "I will take legal action."]) {
-      expect(evaluateLetter({}, good + "\n" + bad).some((o) => !o.pass), bad).toBe(true);
+    for (const bad of [
+      "I will sue you.",
+      "I will go to court.",
+      "Under section 12 you must pay.",
+      "I will take legal action.",
+    ]) {
+      expect(
+        evaluateLetter({}, good + "\n" + bad).some((o) => !o.pass),
+        bad,
+      ).toBe(true);
     }
   });
   it("does not mistake 'issued' for 'sue'", () => {

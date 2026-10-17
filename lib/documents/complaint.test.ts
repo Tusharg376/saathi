@@ -21,7 +21,11 @@ const insight = (over: Partial<NormalizedInsight> = {}): NormalizedInsight => ({
 
 describe("complaintPrefillFor", () => {
   it("maps a challan to the challan complaint, with the amount and the worker's explanation", () => {
-    expect(complaintPrefillFor(insight())).toEqual({ issue: "challan", description: "This is a fine for a traffic rule.", amountInr: 500 });
+    expect(complaintPrefillFor(insight())).toEqual({
+      issue: "challan",
+      description: "This is a fine for a traffic rule.",
+      amountInr: 500,
+    });
   });
   it("leaves the complaint type to the worker for other papers", () => {
     const p = complaintPrefillFor(insight({ kind: "platform_message", amount: "" }));
@@ -38,7 +42,15 @@ describe("complaintPrefillFor", () => {
 describe("canComplainAbout", () => {
   it("is false only for an unreadable photo", () => {
     expect(canComplainAbout(insight({ kind: "unreadable" }))).toBe(false);
-    for (const kind of ["challan", "notice", "platform_message", "insurance", "bank_or_payment", "contract", "other"] as const) {
+    for (const kind of [
+      "challan",
+      "notice",
+      "platform_message",
+      "insurance",
+      "bank_or_payment",
+      "contract",
+      "other",
+    ] as const) {
       expect(canComplainAbout(insight({ kind }))).toBe(true);
     }
   });

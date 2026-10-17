@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { requestDraft } from "./client";
 import type { GrievanceRequest, NormalizedDraft } from "./draft";
 
-const req: GrievanceRequest = { issue: "short_payment", lang: "hi", letterLang: "en", description: "They did not pay me Rs 1200." };
+const req: GrievanceRequest = {
+  issue: "short_payment",
+  lang: "hi",
+  letterLang: "en",
+  description: "They did not pay me Rs 1200.",
+};
 const draft = (over: Partial<NormalizedDraft> = {}): NormalizedDraft => ({
   needsInfo: false,
   questions: [],
@@ -12,7 +17,11 @@ const draft = (over: Partial<NormalizedDraft> = {}): NormalizedDraft => ({
   evidence: ["Screenshot"],
   ...over,
 });
-const reply = (status: number, body: unknown) => async () => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+const reply = (status: number, body: unknown) => async () => ({
+  ok: status >= 200 && status < 300,
+  status,
+  json: async () => body,
+});
 
 describe("requestDraft", () => {
   it("returns the letter", async () => {
@@ -21,12 +30,18 @@ describe("requestDraft", () => {
   });
 
   it("returns follow-up questions in the first round", async () => {
-    const r = await requestDraft(req, reply(200, { draft: draft({ needsInfo: true, questions: ["Which app?"], letter: "" }) }));
+    const r = await requestDraft(
+      req,
+      reply(200, { draft: draft({ needsInfo: true, questions: ["Which app?"], letter: "" }) }),
+    );
     expect(r).toEqual({ kind: "questions", questions: ["Which app?"] });
   });
 
   it("never loops: questions after the final round become a template", async () => {
-    const r = await requestDraft({ ...req, final: true }, reply(200, { draft: draft({ needsInfo: true, questions: ["More?"], letter: "" }) }));
+    const r = await requestDraft(
+      { ...req, final: true },
+      reply(200, { draft: draft({ needsInfo: true, questions: ["More?"], letter: "" }) }),
+    );
     expect(r).toEqual({ kind: "template", reason: "failed" });
   });
 
@@ -52,7 +67,10 @@ describe("requestDraft", () => {
 
   it("treats an empty or unparseable body as a failure, not a blank letter", async () => {
     expect(await requestDraft(req, reply(200, {}))).toEqual({ kind: "template", reason: "failed" });
-    expect(await requestDraft(req, reply(200, { draft: draft({ letter: "" }) }))).toEqual({ kind: "template", reason: "failed" });
+    expect(await requestDraft(req, reply(200, { draft: draft({ letter: "" }) }))).toEqual({
+      kind: "template",
+      reason: "failed",
+    });
     const badJson = async () => ({ ok: true, status: 200, json: async () => Promise.reject(new Error("bad")) });
     expect(await requestDraft(req, badJson)).toEqual({ kind: "template", reason: "failed" });
   });

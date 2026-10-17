@@ -1,4 +1,4 @@
-import type { ChatAction, ChatErrorCode, ChatEvent } from "../agent/events";
+import type { ChatAction, ChatErrorCode, ChatEvent, ChatRequest } from "../agent/events";
 import { detectEmergency } from "../safety/emergency";
 
 /** An error the chat screen can show: anything the server reports, plus "no connection at all". */
@@ -71,4 +71,35 @@ export function toHistory(messages: Msg[]): { role: "user" | "assistant"; text: 
 export function localEmergency(text: string): EmergencyInfo | undefined {
   const r = detectEmergency(text);
   return r.severity ? { severity: r.severity, helplines: r.helplines } : undefined;
+}
+
+/** The screen after the worker asks something: their message, and an empty answer that will stream in. */
+export function startTurn(all: Msg[], ids: { user: string; bot: string }, text: string): Msg[] {
+  return [
+    ...all,
+    { id: ids.user, role: "user", text },
+    // The emergency check runs on the device, before any network call.
+    { id: ids.bot, role: "assistant", text: "", streaming: true, emergency: localEmergency(text) },
+  ];
+}
+
+/** The last thing the worker asked, and the conversation as it was before they asked it. Used to try again. */
+export function lastQuestion(all: Msg[]): { text: string; before: Msg[] } | null {
+  const at = all.findLastIndex((m) => m.role === "user");
+  return at < 0 ? null : { text: all[at].text, before: all.slice(0, at) };
+}
+
+/** The request for one question: recent history, the question, and the worker's profile if they saved one. */
+export function buildChatRequest(
+  history: { role: "user" | "assistant"; text: string }[],
+  text: string,
+  context: { lang: ChatRequest["lang"]; today: string; profile: NonNullable<ChatRequest["profile"]> },
+): ChatRequest {
+  const { lang, today, profile } = context;
+  return {
+    messages: [...history, { role: "user", text }],
+    lang,
+    today,
+    ...(Object.keys(profile).length > 0 && { profile }),
+  };
 }

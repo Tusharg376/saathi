@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { LangSchema } from "../i18n/lang-schema";
 import { searchKb } from "../kb/search";
+import { hideUnofficialLinks } from "../safety/links";
 import { redactPII } from "../safety/pii";
 
 export const DOC_KINDS = [
@@ -29,9 +30,14 @@ export const DocumentInsight = z.object({
   next_steps: z.array(z.string()).max(5).describe("Concrete next steps, using official channels."),
   bring: z.array(z.string()).max(6).describe("Papers to carry if they must visit an office."),
   scam_signs: z.boolean().describe("True if it looks like a scam or phishing."),
-  needs_human_help: z.boolean().describe("True if it is serious: court or legal notice, large money, police, termination with allegations."),
+  needs_human_help: z
+    .boolean()
+    .describe("True if it is serious: court or legal notice, large money, police, termination with allegations."),
   confidence: z.enum(["high", "medium", "low"]).describe("How sure you are you read it correctly."),
-  english_keywords: z.array(z.string()).max(5).describe("Up to 5 short ENGLISH keywords for searching help, e.g. 'challan', 'id blocked', 'insurance claim'."),
+  english_keywords: z
+    .array(z.string())
+    .max(5)
+    .describe("Up to 5 short ENGLISH keywords for searching help, e.g. 'challan', 'id blocked', 'insurance claim'."),
 });
 export type DocumentInsight = z.infer<typeof DocumentInsight>;
 
@@ -40,12 +46,13 @@ export interface NormalizedInsight extends Omit<DocumentInsight, "english_keywor
   related: string[];
 }
 
-const cut = (s: string, n: number) => redactPII(s.trim()).text.slice(0, n);
+const cut = (s: string, n: number) => hideUnofficialLinks(redactPII(s.trim()).text).slice(0, n);
 const cutAll = (xs: string[], n: number) => xs.map((x) => cut(x, n)).filter(Boolean);
 
 /**
- * Scrub model output. The prompt tells the model not to repeat ID numbers, but a
- * prompt is a request, not a guarantee: redact every string and bound every length.
+ * Scrub model output. The prompt tells the model not to repeat ID numbers or copy links, but a
+ * prompt is a request, not a guarantee: redact every string, hide links that are not government
+ * addresses, and bound every length.
  */
 export function normalizeInsight(raw: DocumentInsight): NormalizedInsight {
   const unreadable = raw.kind === "unreadable";
@@ -81,6 +88,7 @@ Rules:
 - If the image is too dark, blurry, cut off or not a document: set kind to "unreadable", say in what_is_this what would help (better light, closer, flat, whole page), and leave other lists empty.
 - deadline: copy it exactly as written. Empty string if there is none.
 - NEVER repeat an Aadhaar, PAN, bank account, card, OTP or phone number. Say "an Aadhaar number" instead.
+- NEVER copy a web link or a phone number from the document into your answer, even to warn about it. Say "a link" or "a phone number". Only name an official government website (ending in .gov.in or .nic.in) when it is the right place to go.
 - scam_signs = true if it asks for an OTP, PIN, CVV or password; asks to approve a UPI request; asks for a fee to get a job, an ID, a refund or a prize; uses urgent threats; or has a suspicious link or number.
 - needs_human_help = true for court or legal notices, police or FIR matters, large sums, loss of work with allegations, or anything that could cost the worker money or rights.
 - next_steps: concrete and safe. Use official channels. Never tell the worker to ignore a legal notice. Never tell them to sign or pay unless it is clearly legitimate and they have checked.

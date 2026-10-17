@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { todayISO } from "@/lib/earnings/dates";
 import { streamChat } from "@/lib/chat/client";
 import { offlineAnswerIds } from "@/lib/chat/offline";
-import { applyEvent, localEmergency, toHistory, type Msg } from "@/lib/chat/messages";
+import { applyEvent, buildChatRequest, lastQuestion, startTurn, toHistory, type Msg } from "@/lib/chat/messages";
 import { usePref } from "@/lib/prefs/store";
 import { useProfile } from "@/lib/profile/store";
 import { speak, stopSpeaking } from "@/lib/voice/speech";
@@ -51,14 +51,10 @@ export function useChat() {
       const text = raw.trim();
       if (!text || busy) return;
 
-      const botId = `a${++counter.current}`;
+      const ids = { user: `u${++counter.current}`, bot: `a${++counter.current}` };
+      const botId = ids.bot;
       const history = toHistory(latest.current);
-      // The emergency check runs on the device, before any network call.
-      setMessages((all) => [
-        ...all,
-        { id: `u${++counter.current}`, role: "user", text },
-        { id: botId, role: "assistant", text: "", streaming: true, emergency: localEmergency(text) },
-      ]);
+      setMessages((all) => startTurn(all, ids, text));
       setBusy(true);
       stopSpeaking(); // a new question silences the last answer
 
@@ -68,12 +64,7 @@ export function useChat() {
 
       try {
         await streamChat(
-          {
-            messages: [...history, { role: "user", text }],
-            lang,
-            today: todayISO(),
-            ...(Object.keys(profile).length > 0 && { profile }),
-          },
+          buildChatRequest(history, text, { lang, today: todayISO(), profile }),
           (e) => {
             if (e.type === "text") answer += e.text;
             patch(botId, (m) => applyEvent(m, e));
@@ -93,11 +84,10 @@ export function useChat() {
   );
 
   const retry = useCallback(() => {
-    const all = latest.current;
-    const lastUser = [...all].reverse().find((m) => m.role === "user");
-    if (!lastUser) return;
-    setMessages(all.slice(0, all.lastIndexOf(lastUser)));
-    void send(lastUser.text);
+    const last = lastQuestion(latest.current);
+    if (!last) return;
+    setMessages(last.before);
+    void send(last.text);
   }, [send]);
 
   const reset = useCallback(() => {

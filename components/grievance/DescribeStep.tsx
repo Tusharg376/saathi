@@ -13,7 +13,8 @@ export function DescribeStep({ form }: { form: ComplaintForm }) {
   const { t, lang } = useI18n();
   const { issue, fields, setFields } = form;
   if (!issue) return null;
-  const setField = (k: keyof typeof fields) => (e: { target: { value: string } }) => setFields({ ...fields, [k]: e.target.value });
+  const setField = (k: keyof typeof fields) => (e: { target: { value: string } }) =>
+    setFields({ ...fields, [k]: e.target.value });
 
   return (
     <section className="space-y-4">
@@ -61,8 +62,17 @@ export function DescribeStep({ form }: { form: ComplaintForm }) {
         <fieldset className="space-y-2">
           <legend className="font-extrabold">{t("cmp.letter_lang")}</legend>
           {(["en", "app"] as const).map((v) => (
-            <label key={v} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 border-tarmac bg-paper px-3">
-              <input type="radio" name="letterLang" checked={form.letterLang === v} onChange={() => form.setLetterLang(v)} className="size-5 accent-tarmac" />
+            <label
+              key={v}
+              className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 border-tarmac bg-paper px-3"
+            >
+              <input
+                type="radio"
+                name="letterLang"
+                checked={form.letterLang === v}
+                onChange={() => form.setLetterLang(v)}
+                className="size-5 accent-tarmac"
+              />
               <span className="font-bold">{t(v === "en" ? "cmp.letter_en" : "cmp.letter_app")}</span>
             </label>
           ))}

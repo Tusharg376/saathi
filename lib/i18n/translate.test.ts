@@ -33,7 +33,12 @@ describe("acceptUiTranslations", () => {
   const source = { a: "Hello", b: "{pct}% more", c: "Call 112", d: "{n} of {m}" };
 
   it("accepts good translations", () => {
-    const r = acceptUiTranslations(source, { a: "नमस्ते", b: "{pct}% ज़्यादा", c: "112 पर कॉल करें", d: "{m} में से {n}" });
+    const r = acceptUiTranslations(source, {
+      a: "नमस्ते",
+      b: "{pct}% ज़्यादा",
+      c: "112 पर कॉल करें",
+      d: "{m} में से {n}",
+    });
     expect(Object.keys(r.accepted)).toEqual(["a", "b", "c", "d"]);
     expect(r.rejected).toEqual([]);
   });
@@ -72,7 +77,12 @@ describe("acceptKbTranslation", () => {
   const good = {
     title: "पीएम श्रम योगी मान-धन (PM-SYM) पेंशन",
     summary: "असंगठित मज़दूरों के लिए एक पेंशन योजना। 60 साल के बाद तय पेंशन मिलती है।",
-    eligibility: ["उम्र 18 से 40 साल", "महीने की आमदनी ₹15,000 या कम", "EPFO, ESIC या NPS के सदस्य नहीं", "आयकर दाता नहीं"],
+    eligibility: [
+      "उम्र 18 से 40 साल",
+      "महीने की आमदनी ₹15,000 या कम",
+      "EPFO, ESIC या NPS के सदस्य नहीं",
+      "आयकर दाता नहीं",
+    ],
   };
 
   it("accepts a faithful translation of the fields given", () => {
@@ -104,8 +114,27 @@ describe("acceptKbTranslation", () => {
     expect(acceptKbTranslation(pmsym, { title: 5 }).rejected).toHaveLength(1);
   });
 
+  it("rejects anything that is not a plain object, and lists that are not lists of text", () => {
+    for (const bad of [null, undefined, 7, ["title"], { steps: "one" }, { steps: [1, 2] }, { eligibility: [["x"]] }]) {
+      const r = acceptKbTranslation(pmsym, bad);
+      expect(r.accepted, JSON.stringify(bad)).toEqual({});
+      expect(r.rejected, JSON.stringify(bad)).toHaveLength(1);
+    }
+  });
+
+  it("ignores keys that are not translatable instead of letting them through", () => {
+    const r = acceptKbTranslation(pmsym, { helpline: "999", source_url: "https://evil.example", id: "x" });
+    expect(r.accepted).toEqual({});
+  });
+
   it("every English entry round-trips through its own translatable fields", () => {
-    for (const id of ["scheme.pmsym", "scheme.eshram", "right.deactivation_id_block", "safety.accident_steps", "grievance.short_payment"]) {
+    for (const id of [
+      "scheme.pmsym",
+      "scheme.eshram",
+      "right.deactivation_id_block",
+      "safety.accident_steps",
+      "grievance.short_payment",
+    ]) {
       const e = getEntry(id)!;
       const r = acceptKbTranslation(e, translatableFields(e));
       expect(r.rejected, id).toEqual([]);
@@ -114,7 +143,15 @@ describe("acceptKbTranslation", () => {
 
   it("translatableFields leaves out ids, status, links and helplines", () => {
     const f = translatableFields(eshram);
-    expect(Object.keys(f).sort()).toEqual(["benefits", "documents_needed", "eligibility", "how_to_apply", "status_note", "summary", "title"]);
+    expect(Object.keys(f).sort()).toEqual([
+      "benefits",
+      "documents_needed",
+      "eligibility",
+      "how_to_apply",
+      "status_note",
+      "summary",
+      "title",
+    ]);
     expect(JSON.stringify(f)).not.toMatch(/source_url|helpline|"status"/);
   });
 });
@@ -123,7 +160,12 @@ describe("localizeEntry", () => {
   const hindi = {
     "scheme.pmsym": {
       title: "पीएम श्रम योगी मान-धन पेंशन",
-      eligibility: ["उम्र 18 से 40 साल", "महीने की आमदनी ₹15,000 या कम", "EPFO, ESIC या NPS के सदस्य नहीं", "आयकर दाता नहीं"],
+      eligibility: [
+        "उम्र 18 से 40 साल",
+        "महीने की आमदनी ₹15,000 या कम",
+        "EPFO, ESIC या NPS के सदस्य नहीं",
+        "आयकर दाता नहीं",
+      ],
     },
   };
 

@@ -47,5 +47,9 @@ function subscribe(callback: () => void): () => void {
 }
 
 export function usePref(key: PrefKey): boolean {
-  return useSyncExternalStore(subscribe, () => snapshot(key), () => false);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot(key),
+    () => false,
+  );
 }

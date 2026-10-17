@@ -19,7 +19,7 @@ class SaathiDB extends Dexie {
 
 let db: SaathiDB | null = null;
 
-export function getDb(): SaathiDB {
+function getDb(): SaathiDB {
   if (typeof indexedDB === "undefined") throw new Error("On-device storage is not available in this browser.");
   return (db ??= new SaathiDB());
 }
@@ -56,6 +56,14 @@ export function sortNewestFirst(entries: EarningEntry[]): EarningEntry[] {
 
 /** Calls `onChange` now and on every change. Returns an unsubscribe function. */
 export function watchEntries(onChange: (entries: EarningEntry[]) => void, onError?: (e: unknown) => void): () => void {
+  try {
+    getDb(); // throws when this browser has no IndexedDB
+  } catch (e) {
+    // Without IndexedDB, Dexie's live query stays silent (no data, no error), which would leave
+    // the screen loading forever. Say so ourselves.
+    queueMicrotask(() => onError?.(e));
+    return () => {};
+  }
   const sub = liveQuery(() => getDb().earnings.toArray()).subscribe({
     next: (rows) => onChange(sortNewestFirst(rows)),
     error: (e) => onError?.(e),
