@@ -30,8 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files: real keys live in .env.local and must never be committed.
+# .env.example is the template and SHOULD be committed.
 .env*
+!.env.example
+
+# evals write a local run report
+/evals/live/last-run.json
 
 # vercel
 .vercel

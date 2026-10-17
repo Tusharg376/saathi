@@ -1,0 +1,208 @@
+[
+  {
+    "id": "grievance.deactivation",
+    "category": "grievance",
+    "title": "Complaint: ID blocked or account deactivated",
+    "summary": "Ask the platform in writing for the exact reason and a chance to appeal. Keep every message. Escalate step by step if there is no answer.",
+    "keywords": ["id blocked", "deactivated", "account suspended", "terminated", "removed from platform", "blocked", "delisted", "id block", "आईडी ब्लॉक", "अकाउंट बंद"],
+    "steps": [
+      "Write to the platform's support in the app and ask for the exact reason and how to appeal. Keep the ticket number",
+      "Email the platform's grievance officer. Most platforms publish this contact on their website or in the app under Contact or Policies",
+      "If there is no reply in about 15 days (a sensible wait, not a legal limit), complain to your state labour department",
+      "Call the e-Shram helpline 14434 and ask where to complain about a platform in your state",
+      "If your state has a gig-worker law (Rajasthan, Karnataka, Bihar, Jharkhand, Telangana), ask the labour department about its complaint process",
+      "For serious harm, ask for free legal aid on 15100"
+    ],
+    "documents_needed": [
+      "Screenshot of the block message",
+      "Your worker ID and registered phone number",
+      "Screenshots of recent ratings and earnings",
+      "Ticket numbers and dates of your messages to support"
+    ],
+    "status": "state_specific",
+    "status_note": "Which authority takes platform complaints, and what notice a platform must give before deactivation, depends on your state and the platform's policy. The wait times here are suggestions, not legal deadlines. Never promise reinstatement.",
+    "helpline": "14434",
+    "source_url": "https://labour.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.short_payment",
+    "category": "grievance",
+    "title": "Complaint: payment short or missing",
+    "summary": "If a platform paid less than the app showed, or has not paid at all, collect the trips and amounts, ask support for a written breakdown, and escalate if it is not fixed.",
+    "keywords": ["payment short", "less paid", "not paid", "payout missing", "payment not received", "settlement", "weekly payout", "कम पैसे", "पेमेंट नहीं आया"],
+    "steps": [
+      "List the dates, trip or order IDs and the amount the app showed against the amount you received",
+      "Raise a ticket in the app and ask for a written breakdown of the difference. Keep the ticket number",
+      "Email the platform's grievance officer with the list and screenshots",
+      "If it stays unpaid after about 15 days (a sensible wait, not a legal limit), complain to the state labour department",
+      "Call 14434 for guidance on where to complain in your state"
+    ],
+    "documents_needed": [
+      "Screenshots of the earnings screen showing the amount due",
+      "Bank statement or SMS showing what was received",
+      "Trip or order IDs and dates",
+      "Ticket numbers"
+    ],
+    "status": "live",
+    "helpline": "14434",
+    "source_url": "https://labour.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.penalty",
+    "category": "grievance",
+    "title": "Complaint: wrongful penalty or deduction",
+    "summary": "If money was cut as a penalty, fine or fee that you think is wrong, ask for the exact rule and the proof, and ask for a review in writing.",
+    "keywords": ["penalty", "deduction", "fine", "wrongly cut", "money cut", "fee deducted", "false complaint", "bad rating penalty", "जुर्माना", "कटौती", "पैसे कटे"],
+    "steps": [
+      "Note the date, amount and the reason the app gave. Take a screenshot",
+      "Ask support in writing which rule was applied and what proof they have. Keep the ticket number",
+      "Ask for a review of the penalty and for the money to be returned if it is wrong",
+      "Email the platform's grievance officer if support does not fix it",
+      "If there is no answer in about 15 days (a sensible wait, not a legal limit), complain to the state labour department"
+    ],
+    "documents_needed": [
+      "Screenshot of the penalty or deduction",
+      "Screenshots of the order, chat or customer complaint if you have them",
+      "Your earnings screen before and after",
+      "Ticket numbers"
+    ],
+    "status": "live",
+    "helpline": "14434",
+    "source_url": "https://labour.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.incentive",
+    "category": "grievance",
+    "title": "Complaint: promised incentive or bonus not paid",
+    "summary": "If you completed an offer's target but the bonus was not paid, show the offer terms and your numbers and ask for the payment in writing.",
+    "keywords": ["incentive", "bonus", "target", "offer not paid", "reward", "milestone", "incentive not paid", "इंसेंटिव", "बोनस"],
+    "steps": [
+      "Take a screenshot of the offer and its terms, and of your completed trips or orders",
+      "Raise a ticket and ask for the incentive to be paid or for a written reason it was not. Keep the ticket number",
+      "Email the platform's grievance officer with the offer screenshot and your count",
+      "If it stays unpaid after about 15 days (a sensible wait, not a legal limit), complain to the state labour department"
+    ],
+    "documents_needed": [
+      "Screenshot of the offer terms and dates",
+      "Screenshot of your completed count",
+      "Earnings statement for those days",
+      "Ticket numbers"
+    ],
+    "status": "live",
+    "helpline": "14434",
+    "source_url": "https://labour.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.accident_claim",
+    "category": "grievance",
+    "title": "Complaint: accident help or insurance claim refused or delayed",
+    "summary": "After an accident, keep all medical papers and report it in the platform app. If the platform's accident cover is refused or delayed, write to the platform and the insurer, and check any personal accident insurance you hold.",
+    "keywords": ["accident claim", "insurance claim", "claim rejected", "claim delayed", "hospital bill", "accident cover", "medical expenses", "दुर्घटना क्लेम", "बीमा क्लेम"],
+    "steps": [
+      "Report the accident in the platform app right away and note the report number",
+      "Keep hospital bills, discharge papers, photos and the police report or FIR copy if one was made",
+      "Ask the platform in writing how to claim its accident cover and by when. Keep the reply",
+      "If you have PMSBY or another personal accident insurance, ask your bank how to claim and by when",
+      "If the claim is refused or delayed, email the platform's grievance officer and the insurer's grievance contact",
+      "Call 14434 for guidance, and 15100 for free legal aid if the claim is large or refused"
+    ],
+    "documents_needed": [
+      "Hospital bills and discharge summary",
+      "Police report or FIR copy if made",
+      "Photos of the accident and injuries",
+      "Platform accident report number",
+      "Insurance policy details if you have any"
+    ],
+    "status": "state_specific",
+    "status_note": "What accident cover a platform provides, and how to claim it, differs by platform. Do not promise that any cover applies. Claim deadlines vary, so ask early.",
+    "helpline": "14434",
+    "source_url": "https://www.jansuraksha.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.harassment",
+    "category": "grievance",
+    "title": "Complaint: harassment, abuse or threats",
+    "summary": "Your safety comes first. If you are in danger call 112. Report abuse to the platform's safety team, keep evidence, and women can also reach the women helpline and the district Local Committee.",
+    "keywords": ["harassment", "abuse", "threat", "molest", "misbehave", "stalking", "customer abuse", "sexual harassment", "छेड़छाड़", "धमकी", "गाली"],
+    "steps": [
+      "If you are in danger now, call 112. Women can also call 181",
+      "Report it in the platform app and ask for the safety team. Keep the report number",
+      "Save screenshots, call logs, chats and the order details. Do not delete anything",
+      "For serious threats or assault, a police complaint is your right. Ask for a copy of the complaint (FIR or receipt)",
+      "Women can also approach the Local Committee for sexual harassment set up by the District Officer. Ask at the district collector's office",
+      "Call 15100 for free legal aid"
+    ],
+    "documents_needed": [
+      "Screenshots of messages and call logs",
+      "Order or trip details with date and time",
+      "Names or description of the person if known",
+      "Witness names if any"
+    ],
+    "status": "state_specific",
+    "status_note": "How a platform handles safety reports, and whether the district Local Committee covers a particular platform job, can differ. Always start with 112 when in danger.",
+    "helpline": "112",
+    "source_url": "https://ncw.nic.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.wage_theft",
+    "category": "grievance",
+    "title": "Complaint: wages not paid by a contractor or employer",
+    "summary": "For daily-wage and contract work, write down the days worked and the agreed rate, ask for payment, and complain to the labour department if it is still unpaid.",
+    "keywords": ["wages not paid", "contractor", "daily wage", "salary not paid", "wage theft", "mazdoori", "labour dues", "ठेकेदार", "मजदूरी नहीं मिली", "वेतन"],
+    "steps": [
+      "Write down the dates you worked, the agreed daily rate and what you were paid",
+      "Ask the contractor or employer for the amount due. Do it with a witness or by message so there is a record",
+      "Take photos of attendance sheets, messages and any payment proof",
+      "If it stays unpaid, complain to the state labour department or the Labour Commissioner's office in your district",
+      "Construction workers can also ask the state construction workers' welfare board for help",
+      "Call 15100 for free legal aid"
+    ],
+    "documents_needed": [
+      "Dates worked and agreed rate",
+      "Name and phone of the contractor or employer and the site address",
+      "Photos of attendance or work records",
+      "Messages about payment",
+      "Names of co-workers who can confirm"
+    ],
+    "status": "state_specific",
+    "status_note": "The office that handles wage complaints, and its process, depends on the state. Confirm where to go with the state labour department.",
+    "source_url": "https://labour.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  },
+  {
+    "id": "grievance.challan",
+    "category": "grievance",
+    "title": "Complaint: wrong traffic challan",
+    "summary": "If a challan is wrong, check it on the official e-challan portal, collect your proof, and contest it online or in the traffic court. Pay only through official channels.",
+    "keywords": ["wrong challan", "challan dispute", "e-challan", "traffic fine wrong", "contest challan", "fine dispute", "गलत चालान", "चालान"],
+    "steps": [
+      "Check the challan on the official e-challan portal using your vehicle number",
+      "Collect proof that it is wrong: photos, the place and time, your documents, GPS or trip records",
+      "Contest it on the portal or in the traffic court named on the challan",
+      "If it is correct and you choose to pay, pay only on the official portal or at an official counter and keep the receipt"
+    ],
+    "documents_needed": [
+      "Challan number and vehicle number",
+      "Vehicle registration, licence and insurance",
+      "Photos or trip records that show where you were",
+      "Receipt if already paid"
+    ],
+    "status": "live",
+    "source_url": "https://echallan.parivahan.gov.in/",
+    "last_verified": null,
+    "confidence": "recalled"
+  }
+]

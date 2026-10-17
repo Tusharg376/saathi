@@ -1,26 +1,142 @@
 @import "tailwindcss";
 
+/*
+ * Saathi visual system.
+ * Idea: every number a worker acts on (earnings, helplines, deadlines) sits on a
+ * commercial number plate: black on yellow, the most legible pairing in their
+ * own world, readable in direct sun. Yellow stays rare so the app is never
+ * mistaken for a platform's brand.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --plate: #f6c700;
+  --plate-deep: #d9ac00;
+  --tarmac: #15171b;
+  --dust: #f1f2ef;
+  --paper: #ffffff;
+  --signal: #c8201a;
+  --highway: #0d6a3a;
+  --strip: #12449a;
+  --ink-soft: #464b53;
+  --line: #cfd2cc;
+
+  --nav-h: 4.5rem;
+  --top-h: 3.75rem;
+
+  /*
+   * next/font injects --f-* variables on <html>. Each Indic family only covers its
+   * own script, so listing them all lets the browser pick per glyph (and, via
+   * unicode-range, download only the scripts actually on screen).
+   */
+  --stack-script: var(--f-deva), var(--f-tamil), var(--f-telugu), var(--f-kannada),
+    var(--f-bengali), var(--f-gujarati);
+  --stack-sans: var(--f-body), var(--stack-script), system-ui, sans-serif;
+  --stack-display: var(--f-display), var(--f-body), var(--stack-script), system-ui, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-plate: var(--plate);
+  --color-plate-deep: var(--plate-deep);
+  --color-tarmac: var(--tarmac);
+  --color-dust: var(--dust);
+  --color-paper: var(--paper);
+  --color-signal: var(--signal);
+  --color-highway: var(--highway);
+  --color-strip: var(--strip);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --font-sans: var(--stack-sans);
+  --font-display: var(--stack-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* Large base size: readable outdoors, on small screens, at arm's length. */
+  font-size: 112.5%;
+  -webkit-text-size-adjust: 100%;
+}
+
+html[data-text="large"] {
+  font-size: 128%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--dust);
+  color: var(--tarmac);
+  font-family: var(--stack-sans);
+  /* Tamil, Telugu and Kannada glyphs are tall; 1.65 stops lines colliding. */
+  line-height: 1.65;
+  overscroll-behavior-y: none;
+}
+
+/* In @layer base so Tailwind utilities (e.g. outline-none on an input that sits inside a
+   focus-within wrapper) can override it. Unlayered CSS would beat every utility. */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--strip);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ---- The plate ------------------------------------------------------- */
+.plate {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--plate);
+  color: var(--tarmac);
+  border: 3px solid var(--tarmac);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--stack-display);
+  line-height: 1;
+}
+.plate::after {
+  /* the thin inner rule real plates have */
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1.5px solid rgba(21, 23, 27, 0.7);
+  border-radius: 8px;
+  pointer-events: none;
+}
+.plate-tag {
+  background: var(--strip);
+  color: #fff;
+  font-family: var(--stack-sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  padding: 0.1rem 0.6rem;
+  text-transform: uppercase;
+}
+.plate-signal .plate-tag {
+  background: var(--signal);
+}
+.plate-num {
+  font-weight: 800;
+  font-stretch: 85%;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  padding: 0.18em 0.55em 0.14em;
+}
+.plate-sm .plate-num { font-size: 1.25rem; }
+.plate-md .plate-num { font-size: 2rem; }
+.plate-lg .plate-num { font-size: 3.25rem; }
+
+/* ---- Road-dash loader: the centre line of a road, moving ------------- */
+.road-dash {
+  height: 4px;
+  width: 4.5rem;
+  background-image: repeating-linear-gradient(90deg, var(--tarmac) 0 12px, transparent 12px 22px);
+  background-size: 22px 100%;
+  animation: road 0.7s linear infinite;
+}
+@keyframes road {
+  to { background-position-x: -22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .road-dash { animation: none; }
+  * { scroll-behavior: auto !important; transition: none !important; }
 }

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "emergency_112",
+    "name": "Emergency (police, fire, ambulance)",
+    "number": "112",
+    "purpose": "Single emergency number for police, fire and ambulance anywhere in India.",
+    "keywords": ["emergency", "police", "help", "danger", "attack", "robbery", "bachao", "पुलिस", "आपातकाल", "बचाओ"],
+    "available": "24x7",
+    "source_url": "https://112.gov.in/"
+  },
+  {
+    "id": "ambulance_108",
+    "name": "Ambulance",
+    "number": "108",
+    "purpose": "Free emergency ambulance in most states.",
+    "keywords": ["ambulance", "accident", "injured", "bleeding", "unconscious", "heart attack", "hospital", "एम्बुलेंस", "दुर्घटना", "चोट"],
+    "available": "24x7",
+    "source_url": "https://112.gov.in/"
+  },
+  {
+    "id": "police_100",
+    "name": "Police",
+    "number": "100",
+    "purpose": "Police control room. 112 also reaches the police.",
+    "keywords": ["police", "theft", "threat", "fight", "dhamki", "पुलिस", "धमकी"],
+    "available": "24x7",
+    "source_url": "https://112.gov.in/"
+  },
+  {
+    "id": "women_181",
+    "name": "Women helpline",
+    "number": "181",
+    "purpose": "Support for women facing harassment, violence or feeling unsafe.",
+    "keywords": ["women", "harassment", "molest", "stalking", "unsafe", "eve teasing", "chhed", "छेड़छाड़", "महिला"],
+    "available": "24x7",
+    "source_url": "https://ncw.nic.in/"
+  },
+  {
+    "id": "cyber_1930",
+    "name": "Cyber fraud helpline",
+    "number": "1930",
+    "purpose": "Report online or UPI fraud quickly. Early reporting helps freeze the money.",
+    "keywords": ["cyber", "fraud", "upi", "scam", "otp", "money lost", "cheated", "fake call", "ठगी", "धोखा"],
+    "available": "24x7",
+    "source_url": "https://cybercrime.gov.in/"
+  },
+  {
+    "id": "eshram_14434",
+    "name": "e-Shram helpline",
+    "number": "14434",
+    "purpose": "Help with e-Shram registration, UAN card and linked benefits for unorganised and gig workers.",
+    "keywords": ["eshram", "e-shram", "uan", "registration", "gig worker", "benefit", "scheme", "ई-श्रम", "पंजीकरण"],
+    "available": "Check current hours on the e-Shram portal",
+    "source_url": "https://eshram.gov.in/"
+  },
+  {
+    "id": "legal_aid_15100",
+    "name": "Free legal aid (NALSA)",
+    "number": "15100",
+    "purpose": "Information on free legal services for people who qualify.",
+    "keywords": ["legal aid", "lawyer", "court", "case", "free legal", "vakil", "वकील", "कानूनी"],
+    "available": "Check current hours with NALSA",
+    "source_url": "https://nalsa.gov.in/"
+  },
+  {
+    "id": "consumer_1915",
+    "name": "National Consumer Helpline",
+    "number": "1915",
+    "purpose": "Complaints about refunds, overcharging and services bought as a consumer.",
+    "keywords": ["consumer", "refund", "overcharge", "complaint", "customer", "उपभोक्ता", "शिकायत"],
+    "available": "Check current hours on the consumer helpline portal",
+    "source_url": "https://consumerhelpline.gov.in/"
+  },
+  {
+    "id": "highway_1033",
+    "name": "National Highways helpline",
+    "number": "1033",
+    "purpose": "Accidents, breakdowns and help on national highways.",
+    "keywords": ["highway", "breakdown", "accident", "road", "truck", "driver", "हाईवे"],
+    "available": "24x7",
+    "source_url": "https://nhai.gov.in/"
+  }
+]
