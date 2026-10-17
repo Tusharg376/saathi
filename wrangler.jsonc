@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "saathi",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "saathi"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+	// GEMINI_API_KEY is a secret, never a var: set it with `npx wrangler secret put GEMINI_API_KEY`.
+	// Model ids and RATE_LIMIT_PER_MINUTE can be added under "vars" if the defaults need overriding.
+}

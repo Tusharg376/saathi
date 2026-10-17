@@ -39,11 +39,15 @@ export function setHandoff<K extends HandoffTarget>(to: K, payload: HandoffMap[K
   pending.set(to, { payload, at: now });
 }
 
-/** Reads without consuming, so React StrictMode's double render sees the same value. */
-export function peekHandoff<K extends HandoffTarget>(to: K, now = Date.now()): HandoffMap[K] | undefined {
+/**
+ * Reads without consuming, so React StrictMode's double render sees the same value.
+ * The clock is read only once there is something to age: while the page is prerendered nothing is
+ * waiting, and Next.js refuses a page that reads the current time during prerender.
+ */
+export function peekHandoff<K extends HandoffTarget>(to: K, now?: number): HandoffMap[K] | undefined {
   const hit = pending.get(to);
   if (!hit) return undefined;
-  if (now - hit.at > HANDOFF_TTL_MS) {
+  if ((now ?? Date.now()) - hit.at > HANDOFF_TTL_MS) {
     pending.delete(to);
     return undefined;
   }
