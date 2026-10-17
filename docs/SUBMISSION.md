@@ -6,19 +6,19 @@ Text for the PromptWars form, notes for evaluators, deploy steps, video scripts 
 
 These are the numbers and states that change. Everything else in this file avoids counts.
 
-| Fact                                 | Value as written                                                                  | Refresh with                                                                          |
-| ------------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Automated tests                      | 1,132 tests in 95 files                                                           | `npx vitest run`                                                                      |
-| Coverage                             | statements 98.8%, branches 95.5%, functions 99.2%, lines 99.7%                    | `npm run test:coverage`                                                               |
-| Lighthouse, mobile, production build | performance 92 to 98 on five pages; accessibility, best practices and SEO 100     | `npx lighthouse <url> --only-categories=performance,accessibility,best-practices,seo` |
-| Live eval cases                      | 41 (15 rights, 7 safety, 8 red-team, 7 earnings, 4 complaint letters)             | count `id:` lines in `evals/cases/*.ts`                                               |
-| Knowledge base                       | 38 entries and 9 helplines                                                        | `lib/kb/data/*.json`                                                                  |
-| Knowledge base provenance            | 8 researched from web sources, 30 written from general knowledge, 0 human-checked | `confidence` and `last_verified` fields                                               |
-| UI languages with complete UI text   | 2 of 8 (English, Hindi)                                                           | `lib/i18n/generated/*.json` and `lib/kb/data/i18n/*.json`                             |
-| `npm audit`                          | 1 advisory (braces), linter toolchain only. `npm audit --omit=dev` is clean       | `npm audit` and `npm audit --omit=dev`                                                |
-| Live Gemini run observed by author   | No                                                                                | Change after `npm run smoke` and `npm run eval` have been run                         |
-| Repo                                 | https://github.com/Tusharg376/saathi                                              | `git remote -v`                                                                       |
-| Deployed link                        | `<PASTE DEPLOYED URL>`                                                            | Vercel dashboard                                                                      |
+| Fact                                 | Value as written                                                                                 | Refresh with                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Automated tests                      | 1,132 tests in 95 files                                                                          | `npx vitest run`                                                                      |
+| Coverage                             | statements 98.8%, branches 95.5%, functions 99.2%, lines 99.7%                                   | `npm run test:coverage`                                                               |
+| Lighthouse, mobile, production build | performance 92 to 98 on five pages; accessibility, best practices and SEO 100                    | `npx lighthouse <url> --only-categories=performance,accessibility,best-practices,seo` |
+| Live eval cases                      | 41 (15 rights, 7 safety, 8 red-team, 7 earnings, 4 complaint letters)                            | count `id:` lines in `evals/cases/*.ts`                                               |
+| Knowledge base                       | 38 entries and 9 helplines                                                                       | `lib/kb/data/*.json`                                                                  |
+| Knowledge base provenance            | 8 researched from web sources, 30 written from general knowledge, 0 human-checked                | `confidence` and `last_verified` fields                                               |
+| UI languages with complete UI text   | 2 of 8 (English, Hindi)                                                                          | `lib/i18n/generated/*.json` and `lib/kb/data/i18n/*.json`                             |
+| `npm audit`                          | 1 advisory (braces), linter toolchain only. `npm audit --omit=dev` is clean                      | `npm audit` and `npm audit --omit=dev`                                                |
+| Live Gemini run observed by author   | No                                                                                               | Change after `npm run smoke` and `npm run eval` have been run                         |
+| Repo                                 | https://github.com/Tusharg376/saathi                                                             | `git remote -v`                                                                       |
+| Deployed link                        | https://saathi.honeygautam0.workers.dev (Cloudflare Worker; confirm this is the link you submit) | Cloudflare dashboard or `npx wrangler deployments list`                               |
 
 ## Form quick reference
 
@@ -26,7 +26,7 @@ These are the numbers and states that change. Everything else in this file avoid
 | --------------------------------------- | ------------------------------------------------------------------------------- |
 | Challenge                               | `<SELECT THE CHALLENGE>`                                                        |
 | GitHub repo link                        | https://github.com/Tusharg376/saathi                                            |
-| Deployed link                           | `<PASTE DEPLOYED URL>`                                                          |
+| Deployed link                           | https://saathi.honeygautam0.workers.dev (confirm)                               |
 | What you are building (or what changed) | Section a below. For a resubmission, add the block "If this is a resubmission". |
 | GenAI services used, and where          | The paste-ready text in section b.                                              |
 | Login for evaluators                    | None needed. There is no login. Open the link and use it.                       |
@@ -212,18 +212,22 @@ Both buttons work with or without the key. Sending the chat question needs the k
 - **Real devices.** Speech recognition, voice quality and the camera path have not been tested on low-end phones. The browser's speech recognition may send audio to the browser maker, and the mic button says so.
 - **Data stays on the device.** There are no accounts. Clearing browser data deletes earnings and the saved profile, and nothing syncs between devices.
 
-## f. Deploy to Vercel
+## f. Deploy
 
-1. Commit and push to GitHub first. Only what is on the repo's main branch gets deployed, and the working tree may hold changes that are not pushed yet.
-2. In Vercel, choose Add New, then Project, and import the GitHub repo. Leave the framework preset as Next.js and the root directory as the repo root. Use Node 22 or newer (`package.json` requires it; check the project's Node.js version setting).
-3. Before the first deploy, open Environment Variables and add `GEMINI_API_KEY` with your key, for Production and Preview. Mark it sensitive if Vercel offers that. Optional: `GEMINI_MODEL_PRIMARY` and `GEMINI_MODEL_FAST` to override the default model ids, and `RATE_LIMIT_PER_MINUTE` (default 20).
-4. Click Deploy.
-5. Open `https://<your-project>.vercel.app/api/health`. It should show `{"ok":true,"ai":"configured"}`. If it shows `not_configured`, add the variable and redeploy: environment changes apply only to new deployments.
-6. Run the walkthrough in section d on the deployed link, on a phone. At least Flows 1, 4, 5, 6, 7 and 8. If the AI replies fail while health says configured, the likely causes are an invalid key, a model id your key cannot use, or quota. Run `npm run smoke` locally with the same key to list the model ids it can call, set `GEMINI_MODEL_PRIMARY` in Vercel to one of them, and redeploy.
-7. Open the URL you will submit in a private window, signed out of Vercel. If it asks for a Vercel login, turn off Deployment Protection for that URL, or submit the public production domain.
-8. Leave the key in place after you submit. Evaluators need it. Do not rotate or delete it, and do not rehearse repeatedly, because each chat, photo and letter uses quota.
+The app is live as a Cloudflare Worker, built with the OpenNext adapter. The full notes are in `DEPLOY.md`. The steps below are the ones that matter for a submission.
 
-Two notes. The rate limiter keeps its counts in memory, so on Vercel each function instance counts separately. If chat replies are cut off on a plan with a short function time limit, raise the maximum duration in the project's Functions settings. Check Vercel's current limits for request size too. Photos are downscaled on the device to a 1280 px JPEG, which is far smaller than any usual body limit.
+1. **Give the Worker its key.** This is the step that turns the AI features on, and it is yours to do: `npx wrangler secret put GEMINI_API_KEY`, then paste the key when asked. The key goes in as a secret. It is never committed and never goes in `wrangler.jsonc`. Until it is set, the app loads but every AI feature answers "not switched on", which is an honest message but will look like a broken app to an evaluator.
+2. Optional overrides go under `"vars"` in `wrangler.jsonc`: `GEMINI_MODEL_PRIMARY`, `GEMINI_MODEL_FAST` and `RATE_LIMIT_PER_MINUTE`. Do not put the key there.
+3. **Test the real runtime first:** `npm run preview` builds the Worker and runs it locally in Cloudflare's `workerd`. Load every page and `/api/health` before deploying. A passing `next build` does not prove the Worker works: with Cache Components on, the Worker hung on every page, which is why `next.config.ts` turns them off.
+4. **Deploy:** `npx wrangler login` once, then `npm run deploy`. Push the code to GitHub first so the repository you submit matches what is live.
+5. Open `<DEPLOYED URL>/api/health`. It should show `{"ok":true,"ai":"configured"}`. If it shows `not_configured`, the secret is missing or was set on a different Worker.
+6. Run the walkthrough in section d on the deployed link, on a phone. At least Flows 1, 4, 5, 6, 7 and 8. If the AI replies fail while health says configured, the likely causes are an invalid key, a model id your key cannot use, or quota. Run `npm run smoke` locally with the same key to list the model ids it can call, set `GEMINI_MODEL_PRIMARY` to one of them, and redeploy.
+7. Open the URL you will submit in a private window to confirm it needs no sign-in.
+8. Leave the key in place after you submit. Evaluators need it. Do not rotate or delete it, and do not rehearse repeatedly, because each chat, photo and letter uses quota. If a key was ever pasted into a chat or a document, rotate it before submitting and set the new one as the secret.
+
+Two notes. The rate limiter keeps its counts in memory, so on Workers each isolate counts separately. For a hard global cap use Cloudflare's rate limiting rules. A Gemini call that streams for a long time needs a plan whose Worker time limits allow it.
+
+A Vercel deployment should also work, since nothing in the app depends on Cloudflare, but it has not been tried for this app.
 
 ## g. Demo video script
 

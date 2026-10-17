@@ -5,8 +5,11 @@ import { contentSecurityPolicy } from "./lib/server/csp";
 const production = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Off on purpose. Saathi is a client-side, local-first app and uses no `use cache`, so it gains
+  // nothing from Cache Components, and with them on the OpenNext Cloudflare worker hangs on every
+  // page ("Worker's code had hung"). Turn them back on only after re-testing `npm run preview`.
+  cacheComponents: false,
+  partialPrefetching: false,
   async headers() {
     return [
       {

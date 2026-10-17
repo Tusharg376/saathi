@@ -1,0 +1,7 @@
+# https://developers.cloudflare.com/workers/static-assets/headers
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
+
+# The browser must always re-check the service worker, or an update would never reach anyone.
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate

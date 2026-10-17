@@ -106,7 +106,7 @@ Browser                                    Server (stateless)                   
  3. events: emergency, notice, tool, text, action, sources, error, done  <---------
 ```
 
-The stack is Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind v4, `@google/genai`, Dexie (IndexedDB), Zod, and Vitest. The Gemini calls use `generateContent` and `generateContentStream`. Because only `lib/llm/gemini.ts` touches the SDK, moving to another Gemini API surface later is a one-file change. The table of every Gemini call site is in [docs/SUBMISSION.md](docs/SUBMISSION.md#b-genai-services-used-and-where).
+The stack is Next.js 16 (App Router; Cache Components are off on purpose, see [DEPLOY.md](DEPLOY.md)), React 19, TypeScript, Tailwind v4, `@google/genai`, Dexie (IndexedDB), Zod, and Vitest. The Gemini calls use `generateContent` and `generateContentStream`. Because only `lib/llm/gemini.ts` touches the SDK, moving to another Gemini API surface later is a one-file change. The table of every Gemini call site is in [docs/SUBMISSION.md](docs/SUBMISSION.md#b-genai-services-used-and-where).
 
 The design idea: every number a worker acts on (take-home pay, a helpline) sits on a commercial number plate, black on yellow, readable in direct sun. Yellow is kept rare so Saathi is never mistaken for a platform's brand, because it sometimes advocates against platforms.
 
@@ -142,18 +142,19 @@ For Gemini 3 models the app does not send a custom temperature. Google advises l
 
 ### Scripts
 
-| Command                                         | What it does                                                                                                |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `npm run dev`, `npm run build`, `npm run start` | Next.js. The service worker registers only in a production build.                                           |
-| `npm run check`                                 | Typecheck, lint, format check and tests. Run this before every commit.                                      |
-| `npm run typecheck`, `npm run lint`             | `next typegen` then `tsc --noEmit` (Next generates the route types a clean checkout lacks), and ESLint.     |
-| `npm run format`, `npm run format:check`        | Prettier, write and check.                                                                                  |
-| `npm test`, `npm run test:watch`                | Vitest, once and watching. No network, no key.                                                              |
-| `npm run test:coverage`                         | Vitest with v8 coverage. CI runs this.                                                                      |
-| `npm run audit:prod`                            | `npm audit --omit=dev --audit-level=high`: audits only what ships to workers.                               |
-| `npm run smoke`                                 | Live check of the Gemini adapter: model list, text, streaming, JSON output, a tool round trip. Needs a key. |
-| `npm run eval`                                  | Live behaviour evals against the real model, with an LLM judge. Needs a key. See below.                     |
-| `npm run translate:ui`, `npm run translate:kb`  | Generate machine translations of UI text and knowledge cards. Needs a key.                                  |
+| Command                                         | What it does                                                                                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`, `npm run build`, `npm run start` | Next.js. The service worker registers only in a production build.                                                                              |
+| `npm run preview`, `npm run deploy`             | Build for Cloudflare Workers with OpenNext, then run it locally in `workerd` (`preview`) or publish it (`deploy`). See [DEPLOY.md](DEPLOY.md). |
+| `npm run check`                                 | Typecheck, lint, format check and tests. Run this before every commit.                                                                         |
+| `npm run typecheck`, `npm run lint`             | `next typegen` then `tsc --noEmit` (Next generates the route types a clean checkout lacks), and ESLint.                                        |
+| `npm run format`, `npm run format:check`        | Prettier, write and check.                                                                                                                     |
+| `npm test`, `npm run test:watch`                | Vitest, once and watching. No network, no key.                                                                                                 |
+| `npm run test:coverage`                         | Vitest with v8 coverage. CI runs this.                                                                                                         |
+| `npm run audit:prod`                            | `npm audit --omit=dev --audit-level=high`: audits only what ships to workers.                                                                  |
+| `npm run smoke`                                 | Live check of the Gemini adapter: model list, text, streaming, JSON output, a tool round trip. Needs a key.                                    |
+| `npm run eval`                                  | Live behaviour evals against the real model, with an LLM judge. Needs a key. See below.                                                        |
+| `npm run translate:ui`, `npm run translate:kb`  | Generate machine translations of UI text and knowledge cards. Needs a key.                                                                     |
 
 `npm run eval` options: `--area <rights|safety|earnings|grievance|redteam>`, `--only <case id>`, `--no-judge` (deterministic checks only), `--delay <ms>` between cases (free-tier keys are rate limited). It exits 1 if any check fails and writes `evals/live/last-run.json` (git-ignored). Read the failures: they are the real to-do list.
 
@@ -182,7 +183,7 @@ Measured with Lighthouse (mobile preset, simulated slow 4G) on the production bu
 | `/rights`         | 96          | 2.8 s | 0   |
 | `/earnings`       | 92          | 3.3 s | 0   |
 
-Accessibility, best practices and SEO were 100 on all five. Before the tuning pass the same pages scored 85 to 92, with LCP of 3.3 to 4.4 s and a small layout shift. Scores on a deployed host will differ from a local run.
+Accessibility, best practices and SEO were 100 on all five. Before the tuning pass the same pages scored 85 to 92, with LCP of 3.3 to 4.4 s and a small layout shift. The same build run in the local Cloudflare Workers runtime (`npm run preview`) scored 99 on `/` and 95 on `/earnings` and `/rights`, again with 100 for accessibility, best practices and SEO. Scores on a deployed host will differ from a local run.
 
 What moved the score:
 
@@ -229,7 +230,7 @@ ESLint enforces size and complexity as errors: `complexity` 12, `max-depth` 4, `
 - The model can still be wrong. Grounding, tool-only facts and validation reduce that risk and do not remove it.
 - The rate limiter is per server instance, and the client address it uses can be spoofed off a trusted proxy.
 - PII redaction covers Indian ID, phone (with spaces, dashes and +91), bank, UPI and email patterns. It does not cover Devanagari digits, one-time codes written as plain six-digit numbers, or names.
-- Pages are rendered per request so the first paint is already in the right language (Partial Prerender). Their HTML is sent `Cache-Control: no-store`, so the browser's back/forward cache is not used for them.
+- Pages are rendered per request so the first paint is already in the right language. Their HTML is sent `Cache-Control: no-store`, so the browser's back/forward cache is not used for them.
 - The app sets one functional cookie, `saathi.lang`, to remember the chosen language for that first paint. There is no analytics and no tracking.
 - Offline, only the web fonts for scripts already shown on visited pages are cached. Other scripts fall back to the phone's own fonts.
 - Document reading has no automated eval, because it needs real photographs.
